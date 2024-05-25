@@ -47,8 +47,7 @@ pub fn handle_price(req: web::Query<StockQuery>) -> Result<HttpResponse, Error>{
     
     let res = PriceDTO {
         price: get_price(*stock),
-        timestamp: Utc::now().timestamp()
+        timestamp: Utc::now().timestamp_millis()
     };
-
     Ok(HttpResponse::Ok().content_type("text/plain").body(serde_json::to_string(&res).unwrap()))
 }

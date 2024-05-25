@@ -35,15 +35,13 @@ async fn main() -> std::io::Result<()> {
     use Stock::*;
     
     let stock_list = vec![MSFT];
-    let mut mm_handles: Vec<thread::JoinHandle<_>> = Vec::new();
     for stock in stock_list {
         market::market::ipo(stock, 1, 10.0);
 
-        let handle = thread::spawn(move || { 
+        thread::spawn(move || { 
             // println!("Started digesst for {:?}", stock);
             digest_cycle::make_market(stock);
         });
-        mm_handles.push(handle);
     }
 
     HttpServer::new(|| {

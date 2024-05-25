@@ -32,19 +32,21 @@ impl OrderBook {
     fn find_trade(&mut self) {
         loop {
             
-            println!("Finding trade");
+            // println!("Finding trade");
             let mut bid = self._bid.write().unwrap();
             let mut ask = self._ask.write().unwrap();
 
-            println!("BOOK: Bid queue has {}", bid.len());
-            println!("BOOK: Ask queue has {}", ask.len());
+            // println!("BOOK: Bid queue has {}", bid.len());
+            // println!("BOOK: Ask queue has {}", ask.len());
+
+            //println!("BOOK: Total queue is {}", bid.len() + ask.len());
 
             if bid.is_empty() {
-                println!("No buy orders!");
+                // println!("No buy orders!");
                 return;
             }
             if ask.is_empty() {
-                println!("No sell orders!");
+                // println!("No sell orders!");
                 return;
             }
 
@@ -62,16 +64,16 @@ impl OrderBook {
                             return;
                         }
                         self.price = *ask_price;
-                        println!("Sold at {}", self.price);
+                        // println!("Sold at {}", self.price);
                     }
                 ((Market, Limit { price }) |
                 (Limit { price }, Market )) => {
                     self.price = *price;
-                    println!("Sold at {price}")
+                    // println!("Sold at {price}")
                 }
                 _ => { 
                     let market_price = self.price;
-                    println!("Market at {market_price}")
+                    // println!("Market at {market_price}")
                 }
             }
 
@@ -87,8 +89,8 @@ impl OrderBook {
                 _ => { }
             } 
 
-            println!("BOOK: Bid queue has {}", bid.len());
-            println!("BOOK: Ask queue has {}", ask.len());
+            // println!("BOOK: Bid queue has {}", bid.len());
+            // println!("BOOK: Ask queue has {}", ask.len());
             
         }
     }

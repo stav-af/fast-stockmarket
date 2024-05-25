@@ -18,8 +18,6 @@ pub fn make_market(stock: Stock) -> ! {
         // RATE LIMITER
         // while last_tick.elapsed() < tick_interval {}
         // last_tick += tick_interval;
-
-        let price = get_price(stock);
         // println!("Price: {price}");
     }
 }

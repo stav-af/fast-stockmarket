@@ -13,7 +13,7 @@ const STD: f64 = 0.0001;
 
 fn probability_density(distance_from_mean: f64, n: Normal) -> f64 {
     let variance = n.variance().unwrap(); // Standard deviation squared, assuming standard deviation is 1 for standard normal distribution
-    (((2.0 * PI * variance).sqrt())) * (-0.5 * distance_from_mean.powi(2)).exp()
+    1.0 / (((2.0 * PI * variance).sqrt())) * (-0.5 * distance_from_mean.powi(2)).exp()
 }
 
 pub fn straddle(stock: Stock) {

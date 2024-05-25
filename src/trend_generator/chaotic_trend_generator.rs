@@ -15,7 +15,7 @@ struct LorenzState {
 }
 
 lazy_static! {
-    static ref _state: Mutex<LorenzState> = Mutex::new(LorenzState {x: 1.0, y: 1.0, z: 1.0});
+    static ref _state: Mutex<LorenzState> = Mutex::new(LorenzState {x: 1.1, y: 1.0, z: 1.0});
     static ref _replace_ptr: Mutex<u32> = Mutex::new(0);
 }
 
@@ -61,7 +61,7 @@ pub fn lorenz_dy() -> f64 {
 pub fn chaotic_trend_generator(stock: Stock) {
     // let mut momentum = *_momentum.lock().unwrap();
     for _ in 0..ACTION_ITERATIONS {
-        let mut trend = -lorenz_dy();
+        let mut trend = lorenz_dy();
         
         // idea here is to add a component to the trend that inverses the momentum of the past MOMENTUM_MEMORY moves
         // this kind of acts the same way like the tuned mass damper in tipei 101
