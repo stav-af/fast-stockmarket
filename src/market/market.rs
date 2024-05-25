@@ -1,10 +1,11 @@
-use lazy_static::lazy_static;
-use std::cell::RefCell;
 use std::sync::RwLock;
+
+use lazy_static::lazy_static;
 use hashbrown::HashMap as HashbrownMap; // Optional, replace HashMap with HashbrownMap if using hashbrown
+use chrono::Utc;
+
 use super::order::*;
 use super::book::*;
-use std::time::{SystemTime, UNIX_EPOCH};
 
 pub struct Market {
     stock_book: RwLock<HashbrownMap<Stock, RwLock<OrderBook>>>
@@ -18,35 +19,39 @@ lazy_static! {
 }
 
 pub fn ipo(stock: Stock, amount: u64, price: f64) {
-    let mut market = MARKET.stock_book.write().unwrap();
-    market.insert(
-        stock,
-        RwLock::new(OrderBook::new(stock, price, amount))
-    );
+    {
+        let mut market = MARKET.stock_book.write().unwrap();
+        market.insert(
+            stock,
+            RwLock::new(OrderBook::new(stock))
+        );
+    }
+   
+    place_order(stock, amount, OrderType::Sell, Some(price), None)
 }
 
-pub fn buy_market(stock: Stock, amount: u64) {
-    let lock =  MARKET.stock_book.read().unwrap();
-    let mut book = lock.get(&stock).unwrap().write().unwrap();
-    book.buy_market(stock, amount);
-}
+pub fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
+    println!("placing order");
 
-pub fn buy_limit(stock: Stock, amount: u64, price: f64) {
+    use OrderVariant::*;
+    let order = Order {
+        order_type: order_type,
+        variant: match price {
+            Some(p) => Limit { price: (p) },
+            None => Market
+        },
+        details: OrderDetails {
+            time: Utc::now().timestamp_nanos_opt().unwrap(),
+            stock: stock,
+            amount: amount,
+            lifetime: lifetime
+        }
+    };
+    println!("awaiting market lock");
     let lock =  MARKET.stock_book.read().unwrap();
+    println!("awaiting book lock");
     let mut book = lock.get(&stock).unwrap().write().unwrap();
-    book.buy_limit(stock, amount, price);
-}
-
-pub fn sell_market(stock: Stock, amount: u64) {
-    let lock =  MARKET.stock_book.read().unwrap();
-    let mut book = lock.get(&stock).unwrap().write().unwrap();
-    book.sell_market(stock, amount);
-}
-
-pub fn sell_limit(stock: Stock, amount: u64, price: f64) {
-    let lock =  MARKET.stock_book.read().unwrap();
-    let mut book = lock.get(&stock).unwrap().write().unwrap();
-    book.sell_limit(stock, amount, price);
+    book.process_order(order);
 }
 
 pub fn get_price(stock: Stock) -> f64 {

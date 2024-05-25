@@ -2,37 +2,45 @@ use std::cmp::{self, Ordering};
 use std::{collections::BinaryHeap, fmt::Binary};
 use std::time::{SystemTime, UNIX_EPOCH};
 use std::sync::{Mutex, RwLock};
-use std::thread;
 
-use tailcall::tailcall;
+use chrono::Utc;
 
 use super::order::{*, self};
+
+
 
 pub struct OrderBook {
     pub price: f64,
     stock: Stock,
-    _bid: RwLock<BinaryHeap<BuyOrder>>,
-    _ask: RwLock<BinaryHeap<SellOrder>>,
+    _bid: RwLock<BinaryHeap<Order>>,
+    _ask: RwLock<BinaryHeap<Order>>,
 }
 
 impl OrderBook {
-    pub fn new(stock: Stock, price: f64, amount: u64) -> Self {
-        let mut order_book = OrderBook {
-            price: price,
+    pub fn new(stock: Stock) -> Self {
+        let order_book = OrderBook {
+            price: 0.0,
             stock: stock, 
-            _bid: RwLock::new(BinaryHeap::<BuyOrder>::new()), 
-            _ask: RwLock::new(BinaryHeap::<SellOrder>::new())
+            _bid: RwLock::new(BinaryHeap::<Order>::new()), 
+            _ask: RwLock::new(BinaryHeap::<Order>::new())
         };
 
-        order_book.sell_limit(stock, amount, price);
         order_book
     }
     
+    pub fn process_order(&mut self, order: Order){
+        println!("Processing order");
+        match order.order_type {
+            OrderType::Buy => { self._bid.write().unwrap().push(order) },
+            OrderType::Sell => { self._ask.write().unwrap().push(order) }
+        }
+        println!("order has been placed");
+        self.find_trade();
+    }
 
     fn find_trade(&mut self) {
         loop {
-            
-            // println!("Finding trade");
+            println!("Finding trade");
             let mut bid = self._bid.write().unwrap();
             let mut ask = self._ask.write().unwrap();
 
@@ -89,75 +97,24 @@ impl OrderBook {
                 _ => { }
             } 
 
-            // println!("BOOK: Bid queue has {}", bid.len());
-            // println!("BOOK: Ask queue has {}", ask.len());
+            println!("BOOK: Bid queue has {}", bid.len());
+            println!("BOOK: Ask queue has {}", ask.len());
             
         }
     }
 
-    pub fn buy_market(&mut self, stock: Stock, amount: u64) {
-        self._bid.write().unwrap().push( BuyOrder {
-            variant: OrderVariant::Market,
-            details: OrderDetails { 
-                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64(), 
-                    stock: stock,
-                    amount: amount
-            }
-        });
+    fn clean_book() {
 
-        let _ = self.find_trade(); 
     }
 
-
-    pub fn buy_limit(&mut self, stock: Stock, amount: u64, price: f64) {
-        self._bid.write().unwrap().push( BuyOrder {
-            variant: OrderVariant::Limit { price: price },
-            details: OrderDetails { 
-                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64(), 
-                    stock: stock,
-                    amount: amount
-            }
-        });
-
-        let _ = self.find_trade(); 
-    }
-
-
-    pub fn sell_market(&mut self, stock: Stock, amount: u64) {
-        self._ask.write().unwrap().push( SellOrder {
-                variant: OrderVariant::Market,
-                details: OrderDetails { 
-                    time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64(), 
-                    stock: stock,
-                    amount: amount
-            }
-        });
-
-        let _ = self.find_trade(); 
-    }
-
-
-    pub fn sell_limit(&mut self,stock: Stock, amount: u64, price: f64) {
-        self._ask.write().unwrap().push( SellOrder {
-            variant: OrderVariant::Limit { price: price },
-            details: OrderDetails { 
-                time: SystemTime::now().duration_since(UNIX_EPOCH).unwrap().as_secs_f64(), 
-                stock: stock,
-                amount: amount
-            }
-        });
-
-
-        let _ = self.find_trade(); 
-    }
 
     #[cfg(test)]
-    pub fn get_bids_for_testing(&self) -> std::sync::RwLockReadGuard<BinaryHeap<BuyOrder>> {
+    pub fn get_bids_for_testing(&self) -> std::sync::RwLockReadGuard<BinaryHeap<Order>> {
         self._bid.read().unwrap()
     }
 
     #[cfg(test)]
-    pub fn get_asks_for_testing(&self) -> std::sync::RwLockReadGuard<BinaryHeap<SellOrder>> {
+    pub fn get_asks_for_testing(&self) -> std::sync::RwLockReadGuard<BinaryHeap<Order>> {
         self._ask.read().unwrap()
     }  
 }

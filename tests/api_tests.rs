@@ -1,5 +1,5 @@
 use FSSM::api_handler::{request_classes::*, handler::*};
-use FSSM::market;
+use FSSM::market::order::OrderType::*;
 use FSSM::market::market::ipo;
 
 
@@ -38,7 +38,7 @@ mod tests {
         let payload = web::Json(order_dto);
 
         let response = handle_ipo(payload_ipo);
-        let resp = handle_buy_order(payload).unwrap();
+        let resp = handle_order(payload, Sell).unwrap();
         assert_eq!(resp.status(), http::StatusCode::OK);
         // Further assertions based on the expected behavior of buy_market
     }

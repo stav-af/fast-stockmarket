@@ -12,12 +12,12 @@ use trend_generator::digest_cycle;
 
 #[post("/buy")]
 async fn buy(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
-    handler::handle_buy_order(details)
+    handler::handle_order(details, market::order::OrderType::Buy)
 }
 
 #[post("/sell")]
 async fn sell(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
-    handler::handle_sell_order(details)
+    handler::handle_order(details, market::order::OrderType::Sell)
 }
 
 #[post("/ipo")]

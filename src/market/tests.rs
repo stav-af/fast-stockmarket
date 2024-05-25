@@ -4,9 +4,7 @@
 mod tests {
     //gpt says i don't need this, rust analyzer disagrees :(
     use crate::market::{
-        order::{Stock, OrderVariant, BuyOrder, SellOrder},
-        market::{ipo, buy_market, sell_market, sell_limit, get_market},
-        book::OrderBook
+        self, book::OrderBook, market::{get_market, ipo, place_order}, order::{Order, OrderType::*, OrderVariant, Stock}
     };
 
     #[test]
@@ -25,16 +23,15 @@ mod tests {
 
         // ipo, then offer sells at a better price, see if they're at the front of the ask queue
         ipo(stock, ipo_size, ipo_price);
-        sell_market(stock, market_order_size);
-        sell_limit(stock, limit_order_size, limit_order_price);
+        place_order(stock, market_order_size, Sell, None, None);
+        place_order(stock, limit_order_size, Sell, Some(limit_order_price), None);
 
-       
         _assert_top_ask(&stock, &OrderVariant::Market, market_order_size, 0.0);
         
-        buy_market(stock, market_order_size);
+        place_order(stock, market_order_size, Buy, None, None);
         _assert_top_ask(&stock, &_limit, limit_order_size, limit_order_price);
     
-        buy_market(stock, limit_order_size);
+        place_order(stock, limit_order_size, Buy, None, None);
         _assert_top_ask(&stock, &_limit, ipo_size, ipo_price);
     }
 
@@ -42,8 +39,8 @@ mod tests {
     #[cfg(test)]
     fn _assert_top_ask(stock: &Stock, variant: &OrderVariant, amount: u64, price: f64){
         // unwrap  all the way into market
-        let market = get_market().write().unwrap();
-        let book = market.get(&stock).unwrap().write().unwrap();
+        let market = get_market().read().unwrap();
+        let book = market.get(&stock).unwrap().read().unwrap();
         
         let ask_queue = book.get_asks_for_testing();
         let ask = ask_queue.peek();
@@ -55,7 +52,7 @@ mod tests {
     }
 
     #[cfg(test)]
-    fn _assert_market_sell(ask: Option<&SellOrder>, amount: u64){
+    fn _assert_market_sell(ask: Option<&Order>, amount: u64){
         match ask {
             Some(order) => {
                 assert!(order.variant == OrderVariant::Market, "Expected a Market order, but found {:?}", order);
@@ -66,7 +63,7 @@ mod tests {
     }
     
     #[cfg(test)]
-    fn _assert_limit_sell(ask: Option<&SellOrder>, amount: u64, price: f64){
+    fn _assert_limit_sell(ask: Option<&Order>, amount: u64, price: f64){
         match ask {
             Some(order) => {
                 assert!(order.variant == OrderVariant::Limit { price }, "Expected a Limit order at {price}, found {:?}", order);

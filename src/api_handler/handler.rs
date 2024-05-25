@@ -2,33 +2,16 @@ use actix_web::{web::{self, get}, HttpResponse, Error};
 use chrono::Utc;
 use serde_json::json;
 
-use crate::market::{order::{BuyOrder, OrderDetails}, book::*, market::*};
+use crate::market::{book::*, market::*, order::{self,  OrderDetails, OrderType}};
 use super::{
     request_classes::{stockmap, IpoDTO, OrderDTO, StockQuery}, 
     response_classes::{PriceDTO}
 };
 
-pub fn handle_buy_order(req: web::Json<OrderDTO>) -> Result<HttpResponse, Error> {
+pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<HttpResponse, Error> {
     match stockmap.get(&req.stock_name) {
         Some(stock) => {
-            match req.price {
-                Some(price) => buy_limit(*stock, req.amount, price),
-                None => buy_market(*stock, req.amount),
-            }
-            Ok(HttpResponse::Ok().finish())
-        },
-        None => Ok(HttpResponse::NotFound().body("Stock not found")),
-    }
-}
-
-
-pub fn handle_sell_order(req: web::Json<OrderDTO>) -> Result<HttpResponse, Error> {
-    match stockmap.get(&req.stock_name) {
-        Some(stock) => {
-            match req.price {
-                Some(price) => sell_limit(*stock, req.amount, price),
-                None => sell_market(*stock, req.amount),
-            }
+            place_order(*stock, req.amount, order_type, req.price, None);
             Ok(HttpResponse::Ok().finish())
         },
         None => Ok(HttpResponse::NotFound().body("Stock not found")),
