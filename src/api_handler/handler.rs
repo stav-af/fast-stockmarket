@@ -1,6 +1,12 @@
 use actix_web::{web::{self, get}, HttpResponse, Error};
+use chrono::Utc;
+use serde_json::json;
+
 use crate::market::{order::{BuyOrder, OrderDetails}, book::*, market::*};
-use super::classes::{OrderDTO, IpoDTO, stockmap, StockQuery};
+use super::{
+    request_classes::{stockmap, IpoDTO, OrderDTO, StockQuery}, 
+    response_classes::{PriceDTO}
+};
 
 pub fn handle_buy_order(req: web::Json<OrderDTO>) -> Result<HttpResponse, Error> {
     match stockmap.get(&req.stock_name) {
@@ -38,6 +44,11 @@ pub fn handle_ipo(req: web::Json<IpoDTO>) -> Result<HttpResponse, Error> {
 
 pub fn handle_price(req: web::Query<StockQuery>) -> Result<HttpResponse, Error>{
     let stock = stockmap.get(&req.stock_name).unwrap();
-    let price = get_price(*stock);
-    Ok(HttpResponse::Ok().content_type("text/plain").body(price.to_string()))
+    
+    let res = PriceDTO {
+        price: get_price(*stock),
+        timestamp: Utc::now().timestamp()
+    };
+
+    Ok(HttpResponse::Ok().content_type("text/plain").body(serde_json::to_string(&res).unwrap()))
 }

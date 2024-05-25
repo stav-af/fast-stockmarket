@@ -1,3 +1,4 @@
+use actix_cors::Cors;
 use market::order::Stock;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, Error};
 use std::thread;
@@ -10,22 +11,22 @@ use api_handler::handler;
 use trend_generator::digest_cycle;
 
 #[post("/buy")]
-async fn buy(details: web::Json<api_handler::classes::OrderDTO>) -> Result<HttpResponse, Error> {
+async fn buy(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
     handler::handle_buy_order(details)
 }
 
 #[post("/sell")]
-async fn sell(details: web::Json<api_handler::classes::OrderDTO>) -> Result<HttpResponse, Error> {
+async fn sell(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
     handler::handle_sell_order(details)
 }
 
 #[post("/ipo")]
-async fn ipo(details: web::Json<api_handler::classes::IpoDTO>) -> Result<HttpResponse, Error> {
+async fn ipo(details: web::Json<api_handler::request_classes::IpoDTO>) -> Result<HttpResponse, Error> {
     handler::handle_ipo(details)
 }
 
 #[get("/price")]
-async fn price(query: web::Query<api_handler::classes::StockQuery>) -> Result<HttpResponse, Error> {
+async fn price(query: web::Query<api_handler::request_classes::StockQuery>) -> Result<HttpResponse, Error> {
     handler::handle_price(query)
 }
 
@@ -47,6 +48,10 @@ async fn main() -> std::io::Result<()> {
 
     HttpServer::new(|| {
         App::new()
+            .wrap(
+                Cors::default()
+                    .allowed_origin("http://localhost:4200")
+            )
             .service(buy)
             .service(sell)
             .service(ipo)
