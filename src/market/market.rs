@@ -39,8 +39,26 @@ pub fn sell(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>
     place_order(stock, amount, OrderType::Sell, price, lifetime)    
 }
 
+pub fn clean_books(_: Stock) {
+    let market_lock =  MARKET.stock_book.read().unwrap();
+    for (_, book) in market_lock.iter() {
+        book.write().unwrap().clean_book();
+    }
+}
+
+pub fn find_trades(_: Stock) {
+    let market_lock =  MARKET.stock_book.read().unwrap();
+    for (_, book) in market_lock.iter() {
+        book.write().unwrap().find_trade();
+    }
+}
+
 fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
-    println!("placing order");
+    if amount <= 0 {
+        return;
+    }
+
+    // println!("placing order");
 
     use OrderVariant::*;
     let order = Order {
@@ -53,12 +71,12 @@ fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f
             time: Utc::now().timestamp_nanos_opt().unwrap(),
             stock: stock,
             amount: amount,
-            lifetime: lifetime
+            lifetime_nanos: lifetime
         }
     };
-    println!("awaiting market lock");
+    // println!("awaiting market lock");
     let lock =  MARKET.stock_book.read().unwrap();
-    println!("awaiting book lock");
+    // println!("awaiting book lock");
     let mut book = lock.get(&stock).unwrap().write().unwrap();
     book.process_order(order);
 }

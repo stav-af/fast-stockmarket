@@ -6,7 +6,7 @@ use crate::market::order::{ Stock, OrderType };
 
 const LORENZ_ITERATIONS: u64 = 100;
 const ACTION_ITERATIONS: u64 = 500;
-const VOLUME_MULTIPLIER: u64 = 5;
+const VOLUME_MULTIPLIER: u64 = 50;
 
 struct LorenzState {
     x: f64,
@@ -15,7 +15,7 @@ struct LorenzState {
 }
 
 lazy_static! {
-    static ref _STATE: Mutex<LorenzState> = Mutex::new(LorenzState {x: 1.1, y: 1.0, z: 1.0});
+    static ref _STATE: Mutex<LorenzState> = Mutex::new(LorenzState {x: 1.0, y: 1.0, z: 1.0});
 }
 
 pub fn lorenz_dy() -> f64 {
@@ -70,12 +70,13 @@ pub fn generate_trend(stock: Stock) {
         // or just some equations
 
         // println!("momentum is {momentum}");
-        let size = (trend * trend).sqrt() as u64 * VOLUME_MULTIPLIER;
-        let order_type = if trend > 0.0 { Buy } else { Sell };
+        let size = trend.abs() as u64 * VOLUME_MULTIPLIER;
 
         if trend > 0.0 {
             buy(stock, size, None, None);
+            println!("CHAOS: bought: {}", size);
         } else {
+            println!("CHAOS: sold {}", size);
             sell(stock, size, None, None);
         }
     }

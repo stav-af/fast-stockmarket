@@ -1,23 +1,34 @@
 use std::time::{Duration, Instant};
+use std::thread;
 
-use crate::market::order::Stock; 
-use super::{market_maker, chaotic_trend_generator};
+use crate::market::order::Stock;
+use crate::market::market::{clean_books, find_trades};
+use super::{market_maker::straddle, chaotic_trend_generator::generate_trend};
 
+// ticks per second, should describe the max tickrate
 const TICKRATE: f64 = 1000.0;
 
-pub fn make_market(stock: Stock) -> ! {
+pub fn make_market(stock: Stock) {
     println!("Making market");
-    let tick_interval = Duration::new(0, (1_000_000_000.0 / TICKRATE) as u32);
-
-    let mut last_tick = Instant::now();
     
-    loop {
-        chaotic_trend_generator::generate_trend(stock);
-        market_maker::straddle(stock);
+    agent_dispatcher(generate_trend, stock, TICKRATE);
+    agent_dispatcher(straddle, stock, TICKRATE);
+    agent_dispatcher(find_trades, stock, TICKRATE);
+    agent_dispatcher(clean_books, stock, TICKRATE/100.0);
+}
 
-        // RATE LIMITER
-        while last_tick.elapsed() < tick_interval {}
-        last_tick += tick_interval;
-        // println!("Price: {price}");
-    }
+fn agent_dispatcher(f: fn(Stock) -> (), stock: Stock, tickrate: f64){
+    // dispatches a function f acting on a stock stock, tickrate times per second.
+    // designed to be ran in it's own thread
+    thread::spawn( move || {
+        let tick_interval = Duration::new(0, (1_000_000_000.0 / tickrate) as u32);
+        let mut last_tick = Instant::now();
+        loop {
+            f(stock);
+
+            // RATELIMIT
+            while last_tick.elapsed() < tick_interval {}
+            last_tick += tick_interval;
+        }
+    });
 }

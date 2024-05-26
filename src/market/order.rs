@@ -25,7 +25,7 @@ pub struct OrderDetails {
     pub time: i64,
     pub stock: Stock,
     pub amount: u64,
-    pub lifetime: Option<i64>
+    pub lifetime_nanos: Option<i64>
 }
 
 #[derive(Debug)]
