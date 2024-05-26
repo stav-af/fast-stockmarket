@@ -1,15 +1,14 @@
-use actix_web::{web::{self, get}, HttpResponse, Error};
+use actix_web::{web, HttpResponse, Error};
 use chrono::Utc;
-use serde_json::json;
 
-use crate::market::{book::*, market::*, order::{self,  OrderDetails, OrderType}};
+use crate::market::{market::*, order::OrderType};
 use super::{
-    request_classes::{stockmap, IpoDTO, OrderDTO, StockQuery}, 
-    response_classes::{PriceDTO}
+    request_classes::{STOCKMAP, IpoDTO, OrderDTO, StockQuery}, 
+    response_classes::PriceDTO
 };
 
 pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<HttpResponse, Error> {
-    match stockmap.get(&req.stock_name) {
+    match STOCKMAP.get(&req.stock_name) {
         Some(stock) => {
             place_order(*stock, req.amount, order_type, req.price, None);
             Ok(HttpResponse::Ok().finish())
@@ -20,13 +19,13 @@ pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<H
 
 
 pub fn handle_ipo(req: web::Json<IpoDTO>) -> Result<HttpResponse, Error> {
-    let stock = stockmap.get(&req.stock_name).unwrap();
+    let stock = STOCKMAP.get(&req.stock_name).unwrap();
     ipo(*stock, req.amount, req.price);
     Ok(HttpResponse::Ok().finish())
 }
 
 pub fn handle_price(req: web::Query<StockQuery>) -> Result<HttpResponse, Error>{
-    let stock = stockmap.get(&req.stock_name).unwrap();
+    let stock = STOCKMAP.get(&req.stock_name).unwrap();
     
     let res = PriceDTO {
         price: get_price(*stock),

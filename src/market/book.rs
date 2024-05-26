@@ -1,11 +1,9 @@
-use std::cmp::{self, Ordering};
-use std::{collections::BinaryHeap, fmt::Binary};
-use std::time::{SystemTime, UNIX_EPOCH};
-use std::sync::{Mutex, RwLock};
+use std::cmp;
+use std::collections::BinaryHeap;
+use std::sync::RwLock;
 
-use chrono::Utc;
 
-use super::order::{*, self};
+use super::order::*;
 
 
 
@@ -80,17 +78,17 @@ impl OrderBook {
                     // println!("Sold at {price}")
                 }
                 _ => { 
-                    let market_price = self.price;
+                    // let market_price = self.price;
                     // println!("Market at {market_price}")
                 }
             }
 
             match (cmp::Ord::cmp(&buy.details.amount, &sell.details.amount)) {
-                Ordering::Greater => {
+                cmp::Ordering::Greater => {
                     buy.details.amount -= sell.details.amount;
                     bid.push(buy)
                 }
-                Ordering::Less => {
+                cmp::Ordering::Less => {
                     sell.details.amount -= buy.details.amount;
                     ask.push(sell)
                 }

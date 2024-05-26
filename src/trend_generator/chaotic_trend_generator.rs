@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
-use crate::market::market::{place_order};
+use crate::market::market::place_order;
 use crate::market::order::{ Stock, OrderType };
 
 const LORENZ_ITERATIONS: u64 = 100;
@@ -15,11 +15,11 @@ struct LorenzState {
 }
 
 lazy_static! {
-    static ref _state: Mutex<LorenzState> = Mutex::new(LorenzState {x: 1.1, y: 1.0, z: 1.0});
+    static ref _STATE: Mutex<LorenzState> = Mutex::new(LorenzState {x: 1.1, y: 1.0, z: 1.0});
 }
 
 pub fn lorenz_dy() -> f64 {
-    let mut state = _state.lock().unwrap();
+    let mut state = _STATE.lock().unwrap();
 
     let sigma = 10.0;
     let rho = 28.0;
@@ -57,11 +57,11 @@ pub fn lorenz_dy() -> f64 {
 }
 
 
-pub fn chaotic_trend_generator(stock: Stock) {
+pub fn generate_trend(stock: Stock) {
     // let mut momentum = *_momentum.lock().unwrap();
     use OrderType::*;
     for _ in 0..ACTION_ITERATIONS {
-        let mut trend = lorenz_dy();
+        let trend = lorenz_dy();
         
         // idea here is to add a component to the trend that inverses the momentum of the past MOMENTUM_MEMORY moves
         // this kind of acts the same way like the tuned mass damper in tipei 101

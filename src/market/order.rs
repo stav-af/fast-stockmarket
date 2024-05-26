@@ -1,7 +1,5 @@
 use std::cmp::Ordering;
 
-use actix_web::http::header::ByteRangeSpec;
-
 #[derive(Clone, Copy, Debug, Eq, PartialEq, Hash)]
 pub enum Stock {
     AAPL,

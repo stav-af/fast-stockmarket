@@ -4,7 +4,7 @@
 mod tests {
     //gpt says i don't need this, rust analyzer disagrees :(
     use crate::market::{
-        self, book::OrderBook, market::{get_market, ipo, place_order}, order::{Order, OrderType::*, OrderVariant, Stock}
+        market::{get_market, ipo, place_order}, order::{Order, OrderType::*, OrderVariant, Stock}
     };
 
     #[test]

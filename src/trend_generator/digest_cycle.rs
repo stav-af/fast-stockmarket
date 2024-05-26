@@ -1,7 +1,7 @@
 use std::time::{Duration, Instant};
 
-use crate::market::{order::Stock, market::get_price};
-use super::{market_maker::{*, self}, chaotic_trend_generator::*};
+use crate::market::order::Stock; 
+use super::{market_maker, chaotic_trend_generator};
 
 const TICKRATE: f64 = 1000.0;
 
@@ -12,12 +12,12 @@ pub fn make_market(stock: Stock) -> ! {
     let mut last_tick = Instant::now();
     
     loop {
-        chaotic_trend_generator(stock);
+        chaotic_trend_generator::generate_trend(stock);
         market_maker::straddle(stock);
 
         // RATE LIMITER
-        // while last_tick.elapsed() < tick_interval {}
-        // last_tick += tick_interval;
+        while last_tick.elapsed() < tick_interval {}
+        last_tick += tick_interval;
         // println!("Price: {price}");
     }
 }
