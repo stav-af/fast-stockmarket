@@ -4,7 +4,7 @@
 mod tests {
     //gpt says i don't need this, rust analyzer disagrees :(
     use crate::market::{
-        market::{get_market, ipo, place_order}, order::{Order, OrderType::*, OrderVariant, Stock}
+        market::{get_market, ipo, buy, sell}, order::{Order, OrderType::*, OrderVariant, Stock}
     };
 
     #[test]
@@ -23,15 +23,15 @@ mod tests {
 
         // ipo, then offer sells at a better price, see if they're at the front of the ask queue
         ipo(stock, ipo_size, ipo_price);
-        place_order(stock, market_order_size, Sell, None, None);
-        place_order(stock, limit_order_size, Sell, Some(limit_order_price), None);
+        sell(stock, market_order_size,None, None);
+        sell(stock, limit_order_size, Some(limit_order_price), None);
 
         _assert_top_ask(&stock, &OrderVariant::Market, market_order_size, 0.0);
         
-        place_order(stock, market_order_size, Buy, None, None);
+        buy(stock, market_order_size, None, None);
         _assert_top_ask(&stock, &_limit, limit_order_size, limit_order_price);
     
-        place_order(stock, limit_order_size, Buy, None, None);
+        buy(stock, limit_order_size, None, None);
         _assert_top_ask(&stock, &_limit, ipo_size, ipo_price);
     }
 

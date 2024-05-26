@@ -30,7 +30,16 @@ pub fn ipo(stock: Stock, amount: u64, price: f64) {
     place_order(stock, amount, OrderType::Sell, Some(price), None)
 }
 
-pub fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
+pub fn buy(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>){
+    place_order(stock, amount, OrderType::Buy, price, lifetime)    
+}
+
+
+pub fn sell(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>){
+    place_order(stock, amount, OrderType::Sell, price, lifetime)    
+}
+
+fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
     println!("placing order");
 
     use OrderVariant::*;

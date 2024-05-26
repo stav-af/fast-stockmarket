@@ -1,8 +1,9 @@
 use crate::market::{
-    market::{ get_price, place_order }, 
-    order::{ Stock, OrderType }};
+    market::{ get_price, buy, sell }, 
+    order::Stock
+};
 extern crate statrs;
-use statrs::{distribution::{Normal}, statistics::Distribution};
+use statrs::{distribution::Normal, statistics::Distribution};
 use std::f64::consts::PI;
 
 // VALUES CONTROL THE TRAILING BUY/SELLS
@@ -32,10 +33,10 @@ pub fn straddle(stock: Stock) {
         let trade_volume = (volume * VOLUME_MULTIPLIER) as u64;
         let distance_from_price = i as f64 * TRAIL_LEVEL_GAPS;
 
-        place_order(stock, trade_volume, OrderType::Buy, Some(price - distance_from_price), Some(100));
+        buy(stock, trade_volume, Some(price - distance_from_price), Some(100));
         // buy_limit(stock, trade_volume, price + distance_from_price);
         // sell_limit(stock, trade_volume, price - distance_from_price);
-        place_order(stock, trade_volume, OrderType::Sell, Some(price + distance_from_price), Some(100));
+        sell(stock, trade_volume, Some(price + distance_from_price), Some(100));
         // println!("MARK: Sold {trade_volume} shares at {}", price + distance_from_price);
         // println!("MARK: Bought {trade_volume} shares at {}", price - distance_from_price);
     }

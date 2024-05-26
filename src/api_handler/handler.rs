@@ -10,7 +10,10 @@ use super::{
 pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<HttpResponse, Error> {
     match STOCKMAP.get(&req.stock_name) {
         Some(stock) => {
-            place_order(*stock, req.amount, order_type, req.price, None);
+            match order_type {
+                OrderType::Buy => buy(*stock, req.amount,req.price, None),
+                OrderType::Sell => sell(*stock, req.amount, req.price, None)
+            }
             Ok(HttpResponse::Ok().finish())
         },
         None => Ok(HttpResponse::NotFound().body("Stock not found")),

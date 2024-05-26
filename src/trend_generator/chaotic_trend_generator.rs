@@ -1,7 +1,7 @@
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
-use crate::market::market::place_order;
+use crate::market::market::{buy, sell};
 use crate::market::order::{ Stock, OrderType };
 
 const LORENZ_ITERATIONS: u64 = 100;
@@ -73,7 +73,11 @@ pub fn generate_trend(stock: Stock) {
         let size = (trend * trend).sqrt() as u64 * VOLUME_MULTIPLIER;
         let order_type = if trend > 0.0 { Buy } else { Sell };
 
-        place_order(stock, size, order_type, None, None);
+        if trend > 0.0 {
+            buy(stock, size, None, None);
+        } else {
+            sell(stock, size, None, None);
+        }
     }
 }
 
