@@ -73,10 +73,10 @@ pub fn generate_trend(stock: Stock) {
         let size = trend.abs() as u64 * VOLUME_MULTIPLIER;
 
         if trend > 0.0 {
+            // println!("CHAOS: bought: {}", size);
             buy(stock, size, None, None);
-            //println!("CHAOS: bought: {}", size);
         } else {
-            println!("CHAOS: sold {}", size);
+            // println!("CHAOS: sold {}", size);
             sell(stock, size, None, None);
         }
     }

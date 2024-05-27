@@ -8,16 +8,16 @@ use crate::market::market::{clean_books, find_trades, compress_histories};
 use super::{market_maker::straddle, chaotic_trend_generator::generate_trend};
 
 // ticks per second, should describe the max tickrate
-const TICKRATE: f64 = 100000.0;
+const TICKRATE: f64 = 100.0;
 
 pub fn make_market(stock: Stock) {
     println!("Making market");
     
     dispatch(generate_trend, stock, TICKRATE);
     dispatch(straddle, stock, TICKRATE);
-    dispatch(find_trades, stock, TICKRATE);
+    dispatch(find_trades, stock, f64::MAX);
     dispatch(clean_books, stock, TICKRATE/100.0);
-    dispatch(compress_histories, stock, TICKRATE/100.0)
+    dispatch(compress_histories, stock, TICKRATE/10.0)
 }
 
 fn dispatch(f: fn(Stock) -> (), stock: Stock, tickrate: f64){

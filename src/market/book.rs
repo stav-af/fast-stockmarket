@@ -7,6 +7,7 @@ use chrono::Utc;
 use super::order::*;
 use crate::globals::GRANULARITY;
 use crate::order_history::*;
+use crate::timekeeper::market_time::MTime;
 
 const REPORT_FREQUENCY: GRANULARITY = GRANULARITY::SECOND;
 
@@ -67,7 +68,7 @@ impl OrderBook {
                             return;
                         }
                         self.price = *ask_price;
-                        println!("Sold at {}", self.price);
+                        // println!("Sold at {}", self.price);
 
                     }
                 ((Market, Limit { price }) |
@@ -91,7 +92,7 @@ impl OrderBook {
             self.stats.max_price = if self.stats.max_price < self.price {self.price} else {self.stats.max_price};
             self.stats.min_price = if self.stats.min_price > self.price {self.price} else {self.stats.min_price};
             self.stats.volume += trade_size;
-            if Utc::now().timestamp_nanos_opt().unwrap() > self.stats.timestamp + REPORT_FREQUENCY as i64 {
+            if MTime::now() > self.stats.timestamp + REPORT_FREQUENCY as i64 {
                 self.history.update(self.stats);
                 self.stats = ob_stats::ObStat::default();
             }

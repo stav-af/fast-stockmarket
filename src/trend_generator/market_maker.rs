@@ -41,7 +41,7 @@ pub fn straddle(stock: Stock) {
         // buy_limit(stock, trade_volume, price + distance_from_price);
         // sell_limit(stock, trade_volume, price - distance_from_price);
         buy(stock, trade_volume, Some(price - distance_from_price), Some(100));
-        println!("MARK: Sold {trade_volume} shares at {}", price + distance_from_price);
-        println!("MARK: Bought {trade_volume} shares at {}", price - distance_from_price);
+        // println!("MARK: Sold {trade_volume} shares at {}", price + distance_from_price);
+        // println!("MARK: Bought {trade_volume} shares at {}", price - distance_from_price);
     }
 }
