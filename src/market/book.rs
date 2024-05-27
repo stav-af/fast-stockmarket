@@ -57,16 +57,16 @@ impl OrderBook {
 
             let mut buy = bid.pop().unwrap();
             let mut sell = ask.pop().unwrap();
-            println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
-            println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());
-            println!("BOOK: Ask queue is {}% market orders", 
-                100 * ask.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-                (ask.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            );
-            println!("BOOK: bid queue is {}% market orders", 
-                100 * bid.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-                (bid.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            );
+            // println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
+            // println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());
+            // println!("BOOK: Ask queue is {}% market orders", 
+            //     100 * ask.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
+            //     (ask.iter().map(|o| o.details.amount).sum::<u64>() + 1)
+            // );
+            // println!("BOOK: bid queue is {}% market orders", 
+            //    100 * bid.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
+            //    (bid.iter().map(|o| o.details.amount).sum::<u64>() + 1)
+           // );
             use OrderVariant::*;
             match (&buy.variant, &sell.variant) {
                 (Limit { price: bid_price}, Limit { price: ask_price }) 
@@ -84,11 +84,11 @@ impl OrderBook {
                 ((Market, Limit { price }) |
                 (Limit { price }, Market )) => {
                     self.price = *price;
-                    println!("Sold at {price}")
+                    // println!("Sold at {price}")
                 }
                 _ => { 
                     let market_price = self.price;
-                    println!("Market at {market_price}")
+                    // println!("Market at {market_price}")
                 }
             }
 
@@ -103,18 +103,18 @@ impl OrderBook {
                 }
                 _ => { }
             } 
-            println!("BOOK: SOLD!");
-            println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
-            println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());
-
-            println!("BOOK: Ask queue is {}% market orders", 
-                100 * ask.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-                (ask.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            );
-            println!("BOOK: bid queue is {}% market orders", 
-                100 * bid.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-                (bid.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            );
+            //println!("BOOK: SOLD!");
+            //println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
+            //println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());
+//
+            //println!("BOOK: Ask queue is {}% market orders", 
+            //    100 * ask.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
+            //    (ask.iter().map(|o| o.details.amount).sum::<u64>() + 1)
+            //);
+            //println!("BOOK: bid queue is {}% market orders", 
+            //    100 * bid.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
+            //    (bid.iter().map(|o| o.details.amount).sum::<u64>() + 1)
+            //);
 
         }
     }

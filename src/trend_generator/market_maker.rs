@@ -18,7 +18,7 @@ fn probability_density(distance_from_mean: f64, n: Normal) -> f64 {
     let variance = n.variance().unwrap(); // Standard deviation squared, assuming standard deviation is 1 for standard normal distribution
     // (((2.0 * PI * variance).sqrt())) * ((-0.5 * distance_from_mean.powi(2)) / variance).exp();
     
-    let coefficient = 1.0 / ((2.0 * std::f64::consts::PI * variance).sqrt());
+    let coefficient = 1.0 / ((2.0 * PI * variance).sqrt());
     let exponent = (-0.5 * (distance_from_mean.powi(2) / variance)).exp();
     1.0/(coefficient * exponent)
 }

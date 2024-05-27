@@ -6,7 +6,7 @@ use crate::market::market::{clean_books, find_trades};
 use super::{market_maker::straddle, chaotic_trend_generator::generate_trend};
 
 // ticks per second, should describe the max tickrate
-const TICKRATE: f64 = 1000.0;
+const TICKRATE: f64 = 100000.0;
 
 pub fn make_market(stock: Stock) {
     println!("Making market");
