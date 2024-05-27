@@ -2,12 +2,17 @@ use std::cmp;
 use std::collections::BinaryHeap;
 use std::sync::RwLock;
 
+use chrono::Utc;
 
 use super::order::*;
+use crate::globals::GRANULARITY;
+use crate::order_history::*;
 
-
+const REPORT_FREQUENCY: GRANULARITY = GRANULARITY::SECOND;
 
 pub struct OrderBook {
+    pub history: history_buffer::HistoryBuffer,
+    pub stats: ob_stats::ObStat,
     pub price: f64,
     stock: Stock,
     _bid: RwLock<BinaryHeap<Order>>,
@@ -17,10 +22,12 @@ pub struct OrderBook {
 impl OrderBook {
     pub fn new(stock: Stock) -> Self {
         let order_book = OrderBook {
+            history: history_buffer::HistoryBuffer::new(),
+            stats: ob_stats::ObStat::default(),
             price: 0.0,
             stock: stock, 
             _bid: RwLock::new(BinaryHeap::<Order>::new()), 
-            _ask: RwLock::new(BinaryHeap::<Order>::new())
+            _ask: RwLock::new(BinaryHeap::<Order>::new()),
         };
 
         order_book
@@ -91,18 +98,34 @@ impl OrderBook {
                     // println!("Market at {market_price}")
                 }
             }
+            let trade_size = cmp::min(buy.details.amount, sell.details.amount);
 
-            match (cmp::Ord::cmp(&buy.details.amount, &sell.details.amount)) {
-                cmp::Ordering::Greater => {
-                    buy.details.amount -= sell.details.amount;
-                    bid.push(buy)
-                }
-                cmp::Ordering::Less => {
-                    sell.details.amount -= buy.details.amount;
-                    ask.push(sell)
-                }
-                _ => { }
-            } 
+            if buy.details.amount > trade_size {
+                buy.details.amount -= trade_size;
+                bid.push(buy)
+            } else if sell.details.amount > trade_size {
+                sell.details.amount -= trade_size;
+                ask.push(sell);
+            }
+
+            self.stats.max_price = if self.stats.max_price < self.price {self.price} else {self.stats.max_price};
+            self.stats.min_price = if self.stats.min_price > self.price {self.price} else {self.stats.min_price};
+            self.stats.volume += trade_size;
+            if Utc::now().timestamp_nanos_opt().unwrap() > self.stats.timestamp + REPORT_FREQUENCY as i64 {
+                self.history.update(self.stats);
+                self.stats = ob_stats::ObStat::default();
+            }
+            // match (cmp::Ord::cmp(&buy.details.amount, &sell.details.amount)) {
+            //     cmp::Ordering::Greater => {
+            //         buy.details.amount -= sell.details.amount;
+            //         bid.push(buy)
+            //     }
+            //     cmp::Ordering::Less => {
+            //         sell.details.amount -= buy.details.amount;
+            //         ask.push(sell)
+            //     }
+            //     _ => { }
+            // } 
             //println!("BOOK: SOLD!");
             //println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
             //println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());

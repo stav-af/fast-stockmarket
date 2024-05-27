@@ -6,6 +6,7 @@ use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, Error}
 mod market;
 mod api_handler;
 mod trend_generator;
+mod order_history;
 mod globals;
 
 use api_handler::handler;
