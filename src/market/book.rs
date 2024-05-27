@@ -43,43 +43,25 @@ impl OrderBook {
     }
 
     pub fn find_trade(&mut self) {
+        use OrderVariant::*;
         loop {
             // println!("Finding trade");
             let mut bid = self._bid.write().unwrap();
             let mut ask = self._ask.write().unwrap();
 
-            // println!("BOOK: Bid queue has {}", bid.len());
-            // println!("BOOK: Ask queue has {}", ask.len());
-
-            //println!("BOOK: Total queue is {}", bid.len() + ask.len());
-
             if bid.is_empty() {
-                // println!("BOOK: No buy orders!");
                 return;
             }
             if ask.is_empty() {
-                // println!("BOOK: No sell orders!");
                 return;
             }
 
             let mut buy = bid.pop().unwrap();
             let mut sell = ask.pop().unwrap();
-            // println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
-            // println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());
-            // println!("BOOK: Ask queue is {}% market orders", 
-            //     100 * ask.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-            //     (ask.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            // );
-            // println!("BOOK: bid queue is {}% market orders", 
-            //    100 * bid.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-            //    (bid.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-           // );
-            use OrderVariant::*;
             match (&buy.variant, &sell.variant) {
                 (Limit { price: bid_price}, Limit { price: ask_price }) 
                     => {
                         if bid_price < ask_price {
-                            // println!("BOOK: Could not find viable trade");
                             bid.push(buy);
                             ask.push(sell);
                             return;
@@ -91,11 +73,9 @@ impl OrderBook {
                 ((Market, Limit { price }) |
                 (Limit { price }, Market )) => {
                     self.price = *price;
-                    // println!("Sold at {price}")
                 }
                 _ => { 
                     let market_price = self.price;
-                    // println!("Market at {market_price}")
                 }
             }
             let trade_size = cmp::min(buy.details.amount, sell.details.amount);
@@ -115,30 +95,6 @@ impl OrderBook {
                 self.history.update(self.stats);
                 self.stats = ob_stats::ObStat::default();
             }
-            // match (cmp::Ord::cmp(&buy.details.amount, &sell.details.amount)) {
-            //     cmp::Ordering::Greater => {
-            //         buy.details.amount -= sell.details.amount;
-            //         bid.push(buy)
-            //     }
-            //     cmp::Ordering::Less => {
-            //         sell.details.amount -= buy.details.amount;
-            //         ask.push(sell)
-            //     }
-            //     _ => { }
-            // } 
-            //println!("BOOK: SOLD!");
-            //println!("BOOK: Bid queue has {}", bid.iter().map(|o| o.details.amount).sum::<u64>());
-            //println!("BOOK: Ask queue has {}", ask.iter().map(|o| o.details.amount).sum::<u64>());
-//
-            //println!("BOOK: Ask queue is {}% market orders", 
-            //    100 * ask.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-            //    (ask.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            //);
-            //println!("BOOK: bid queue is {}% market orders", 
-            //    100 * bid.iter().filter(|o| o.variant == OrderVariant::Market).map(|o| o.details.amount).sum::<u64>() / 
-            //    (bid.iter().map(|o| o.details.amount).sum::<u64>() + 1)
-            //);
-
         }
     }
 

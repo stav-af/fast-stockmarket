@@ -8,6 +8,7 @@ mod api_handler;
 mod trend_generator;
 mod order_history;
 mod globals;
+mod timekeeper;
 
 use api_handler::handler;
 use trend_generator::digest_cycle;

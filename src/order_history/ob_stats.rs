@@ -1,7 +1,5 @@
-use chrono::Utc;
-
-use crate::globals::{GRANULARITY, MARKET_EPOCH};
-
+use crate::timekeeper::market_time::MTime;
+use crate::globals::GRANULARITY;
 
 #[derive(Copy, Clone)]
 pub struct ObStat {
@@ -15,7 +13,7 @@ pub struct ObStat {
 impl Default for ObStat {
     fn default() -> Self {
         ObStat {
-            timestamp: Utc::now().timestamp_nanos_opt().unwrap() - *MARKET_EPOCH,
+            timestamp: MTime::now(),
             granularity: GRANULARITY::INSTANT,
             volume: 0,
             max_price: f64::MIN,

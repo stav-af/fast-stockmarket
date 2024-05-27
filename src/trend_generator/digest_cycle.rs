@@ -1,8 +1,10 @@
 use std::time::{Duration, Instant};
 use std::thread;
 
+use crate::globals::ACCELERATION_PARAMETER;
 use crate::market::order::Stock;
-use crate::market::market::{clean_books, find_trades};
+use crate::market::market::{clean_books, find_trades, compress_histories};
+
 use super::{market_maker::straddle, chaotic_trend_generator::generate_trend};
 
 // ticks per second, should describe the max tickrate
@@ -11,13 +13,14 @@ const TICKRATE: f64 = 100000.0;
 pub fn make_market(stock: Stock) {
     println!("Making market");
     
-    agent_dispatcher(generate_trend, stock, TICKRATE);
-    agent_dispatcher(straddle, stock, TICKRATE);
-    agent_dispatcher(find_trades, stock, TICKRATE);
-    agent_dispatcher(clean_books, stock, TICKRATE/100.0);
+    dispatch(generate_trend, stock, TICKRATE);
+    dispatch(straddle, stock, TICKRATE);
+    dispatch(find_trades, stock, TICKRATE);
+    dispatch(clean_books, stock, TICKRATE/100.0);
+    dispatch(compress_histories, stock, TICKRATE/100.0)
 }
 
-fn agent_dispatcher(f: fn(Stock) -> (), stock: Stock, tickrate: f64){
+fn dispatch(f: fn(Stock) -> (), stock: Stock, tickrate: f64){
     // dispatches a function f acting on a stock stock, tickrate times per second.
     // designed to be ran in it's own thread
     thread::spawn( move || {
