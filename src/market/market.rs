@@ -7,6 +7,8 @@ use chrono::Utc;
 use super::order::*;
 use super::book::*;
 
+use crate::globals::MARKET_EPOCH;
+
 pub struct Market {
     stock_book: RwLock<HashbrownMap<Stock, RwLock<OrderBook>>>
 }
@@ -68,7 +70,7 @@ fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f
             None => Market
         },
         details: OrderDetails {
-            time: Utc::now().timestamp_nanos_opt().unwrap(),
+            time: Utc::now().timestamp_nanos_opt().unwrap() - *MARKET_EPOCH,
             stock: stock,
             amount: amount,
             lifetime_nanos: lifetime

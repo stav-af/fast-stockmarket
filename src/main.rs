@@ -3,20 +3,14 @@ use std::thread;
 use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, Error};
 
-use chrono::Utc;
-
 mod market;
 mod api_handler;
 mod trend_generator;
+mod globals;
 
 use api_handler::handler;
 use trend_generator::digest_cycle;
 use market::order::Stock;
-use once_cell::sync::Lazy;
-
-pub static MARKET_EPOCH: Lazy<i64> = Lazy::new(|| {
-    return Utc::now().timestamp_nanos_opt().unwrap(); 
-});
 
 
 #[post("/buy")]
