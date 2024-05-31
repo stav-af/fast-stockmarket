@@ -7,6 +7,8 @@ use chrono::Utc;
 use super::order::*;
 use super::book::*;
 
+use crate::timekeeper::market_time::MTime;
+
 pub struct Market {
     stock_book: RwLock<HashbrownMap<Stock, RwLock<OrderBook>>>
 }
@@ -46,6 +48,13 @@ pub fn clean_books(_: Stock) {
     }
 }
 
+pub fn compress_histories(_: Stock) {
+    let market_lock =  MARKET.stock_book.read().unwrap();
+    for (_, book) in market_lock.iter() {
+        book.write().unwrap().history.compress();
+    }
+}
+
 pub fn find_trades(_: Stock) {
     let market_lock =  MARKET.stock_book.read().unwrap();
     for (_, book) in market_lock.iter() {
@@ -68,7 +77,7 @@ fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f
             None => Market
         },
         details: OrderDetails {
-            time: Utc::now().timestamp_nanos_opt().unwrap(),
+            time: MTime::now(),
             stock: stock,
             amount: amount,
             lifetime_nanos: lifetime

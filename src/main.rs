@@ -1,14 +1,19 @@
-use actix_cors::Cors;
-use market::order::Stock;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, Error};
 use std::thread;
+
+use actix_cors::Cors;
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, Error};
 
 mod market;
 mod api_handler;
 mod trend_generator;
+mod order_history;
+mod globals;
+mod timekeeper;
 
 use api_handler::handler;
 use trend_generator::digest_cycle;
+use market::order::Stock;
+
 
 #[post("/buy")]
 async fn buy(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
