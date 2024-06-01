@@ -37,7 +37,7 @@ async fn price(query: web::Query<api_handler::request_classes::StockQuery>) -> R
 
 #[get("/historic-price")]
 async fn historic_price(query: web::Query<api_handler::request_classes::HistoricPriceQuery>) -> Result<HttpResponse, Error> {
-    handler::handle_historical_price(query)
+    handler::handle_historic_price(query)
 }
 
 #[actix_web::main]

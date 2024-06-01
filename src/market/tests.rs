@@ -1,10 +1,11 @@
 
 
 
+#[cfg(test)]
 mod tests {
     //gpt says i don't need this, rust analyzer disagrees :(
     use crate::market::{
-        market::{get_market, ipo, buy, sell}, 
+        market::{get_market, ipo, buy, sell, find_trades}, 
         order::{Order, OrderType::*, OrderVariant, Stock}
     };
 
@@ -26,20 +27,23 @@ mod tests {
         ipo(stock, ipo_size, ipo_price);
         sell(stock, market_order_size,None, None);
         sell(stock, limit_order_size, Some(limit_order_price), None);
+        find_trades(stock);
 
         _assert_top_ask(&stock, &OrderVariant::Market, market_order_size, 0.0);
         
         buy(stock, market_order_size, None, None);
+        find_trades(stock);
         _assert_top_ask(&stock, &_limit, limit_order_size, limit_order_price);
     
         buy(stock, limit_order_size, None, None);
+        find_trades(stock);
         _assert_top_ask(&stock, &_limit, ipo_size, ipo_price);
     }
 
 
     #[test]
     fn test_clean_book_works() {
-        let stock = Stock::AAPL;
+        let stock = Stock::GOOGL;
         let lifetime = 100;
 
         // put some unmatched orders on, sleep, clean, assert they're empty

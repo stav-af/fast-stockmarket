@@ -66,6 +66,7 @@ pub fn find_trades(_: Stock) {
 }
 
 pub fn get_historical_data<'a>(granularity: GRANULARITY, earliest_stamp: i64, stock: Stock) -> Option<Vec<ObStat>> {
+    
     let market_lock =  MARKET.stock_book.read().unwrap();
     let book = market_lock.get(&stock).unwrap().read().unwrap();
     

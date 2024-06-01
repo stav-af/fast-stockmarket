@@ -22,16 +22,14 @@ pub struct OrderBook {
 
 impl OrderBook {
     pub fn new(stock: Stock) -> Self {
-        let order_book = OrderBook {
+        OrderBook {
             history: history_buffer::HistoryBuffer::new(),
             stats: ob_stats::ObStat::default(),
             price: 0.0,
             stock: stock, 
             _bid: RwLock::new(BinaryHeap::<Order>::new()), 
             _ask: RwLock::new(BinaryHeap::<Order>::new()),
-        };
-
-        order_book
+        }
     }
     
     pub fn process_order(&mut self, order: Order){
@@ -88,7 +86,7 @@ impl OrderBook {
                 sell.details.amount -= trade_size;
                 ask.push(sell);
             }
-
+            
             self.stats.max_price = if self.stats.max_price < self.price {self.price} else {self.stats.max_price};
             self.stats.min_price = if self.stats.min_price > self.price {self.price} else {self.stats.min_price};
             self.stats.volume += trade_size;

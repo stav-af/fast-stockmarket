@@ -10,9 +10,9 @@ pub static MARKET_EPOCH: Lazy<i64> = Lazy::new(|| {
 
 // describes the 'display' nanoseconds passed every 'real' nanosecond
 // 8760 means that every simulated second describes a 'real' hour.
-pub const ACCELERATION_PARAMETER: isize = 86400;
+pub const ACCELERATION_PARAMETER: isize = 8640;
 
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug)]
 pub enum GRANULARITY {
     INSTANT = 0,
     SECOND = 1e9 as isize / ACCELERATION_PARAMETER as isize,

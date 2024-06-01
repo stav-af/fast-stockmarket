@@ -28,10 +28,17 @@ pub fn handle_price(req: web::Query<StockQuery>) -> Result<HttpResponse, Error>{
     Ok(HttpResponse::Ok().content_type("text/plain").json(res))
 }
 
-pub fn handle_historical_price(req: web::Query<HistoricPriceQuery>) -> Result<HttpResponse, Error> {
+pub fn handle_historic_price(req: web::Query<HistoricPriceQuery>) -> Result<HttpResponse, Error> {
     let data = get_historical_data(req.granularity, req.earliest_stamp, req.stock);
     match data {
         None => Ok(HttpResponse::NotFound().body("No data matching that query!")),
-        Some(data) => Ok(HttpResponse::Ok().content_type("application/json").json(data))
+        Some(stats) => {
+            let res = HistoricPriceDTO {
+                granularity: req.granularity,
+                earliest_stamp: stats.iter().min_by(|a, b| a.timestamp.cmp(&b.timestamp)).unwrap().timestamp,
+                data: stats,
+            };
+            Ok(HttpResponse::Ok().content_type("application/json").json(res))
+        }
     }
 }

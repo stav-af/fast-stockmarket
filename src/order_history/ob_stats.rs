@@ -3,7 +3,7 @@ use serde::{Serialize, Deserialize};
 use crate::timekeeper::market_time::MTime;
 use crate::globals::GRANULARITY;
 
-#[derive(Copy, Clone, Serialize, Deserialize)]
+#[derive(Copy, Clone, Serialize, Deserialize, Debug)]
 pub struct ObStat {
     pub timestamp: i64,
     pub granularity: GRANULARITY, 
