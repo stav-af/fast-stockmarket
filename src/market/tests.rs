@@ -4,7 +4,7 @@
 mod tests {
     //gpt says i don't need this, rust analyzer disagrees :(
     use crate::market::{
-        market::{get_market, ipo, buy, sell}, 
+        market::{get_market, ipo, buy, sell, find_trades}, 
         order::{Order, OrderType::*, OrderVariant, Stock}
     };
 
@@ -26,20 +26,29 @@ mod tests {
         ipo(stock, ipo_size, ipo_price);
         sell(stock, market_order_size,None, None);
         sell(stock, limit_order_size, Some(limit_order_price), None);
-
         _assert_top_ask(&stock, &OrderVariant::Market, market_order_size, 0.0);
-        
+        println!("IPO and sells");
+        _print_asks(&stock);
+
         buy(stock, market_order_size, None, None);
+        find_trades(stock);
+        println!("One trade at size {}", market_order_size);
+        _print_asks(&stock);
+
         _assert_top_ask(&stock, &_limit, limit_order_size, limit_order_price);
     
         buy(stock, limit_order_size, None, None);
+        find_trades(stock);
+        println!("Another order made at {}", limit_order_size);
+        _print_asks(&stock);
+
         _assert_top_ask(&stock, &_limit, ipo_size, ipo_price);
     }
 
 
     #[test]
     fn test_clean_book_works() {
-        let stock = Stock::AAPL;
+        let stock = Stock::MSFT;
         let lifetime = 100;
 
         // put some unmatched orders on, sleep, clean, assert they're empty
@@ -67,6 +76,17 @@ mod tests {
         match variant {
             OrderVariant::Market => _assert_market_sell(ask, amount),
             OrderVariant::Limit { price: _ } => _assert_limit_sell(ask, amount, price) 
+        }
+    }
+
+    #[cfg(test)]
+    fn _print_asks(stock: &Stock) {
+        let market = get_market().read().unwrap();
+        let book = market.get(&stock).unwrap().read().unwrap();
+
+        let bid_queue = book.get_asks_for_testing();
+        for bid in &*bid_queue {
+            println!("{:?}", bid)
         }
     }
 
