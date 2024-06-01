@@ -1,5 +1,6 @@
 use once_cell::sync::Lazy;
 use chrono::Utc;
+use serde::{Deserialize, Serialize};
 
 // TIMEKEEPING CONSTANTS
 // keeps track of the start of the market, allowing us to vary time as we like
@@ -11,7 +12,7 @@ pub static MARKET_EPOCH: Lazy<i64> = Lazy::new(|| {
 // 8760 means that every simulated second describes a 'real' hour.
 pub const ACCELERATION_PARAMETER: isize = 86400;
 
-#[derive(Copy, Clone)]
+#[derive(Copy, Clone, Serialize, Deserialize)]
 pub enum GRANULARITY {
     INSTANT = 0,
     SECOND = 1e9 as isize / ACCELERATION_PARAMETER as isize,

@@ -35,6 +35,11 @@ async fn price(query: web::Query<api_handler::request_classes::StockQuery>) -> R
     handler::handle_price(query)
 }
 
+#[get("/historic-price")]
+async fn historic_price(query: web::Query<api_handler::request_classes::HistoricPriceQuery>) -> Result<HttpResponse, Error> {
+    handler::handle_historical_price(query)
+}
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     use Stock::*;
@@ -59,6 +64,7 @@ async fn main() -> std::io::Result<()> {
             .service(sell)
             .service(ipo)
             .service(price)
+            .service(historic_price)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

@@ -7,6 +7,8 @@ use chrono::Utc;
 use super::order::*;
 use super::book::*;
 
+use crate::globals::GRANULARITY;
+use crate::order_history::ob_stats::ObStat;
 use crate::timekeeper::market_time::MTime;
 
 pub struct Market {
@@ -19,7 +21,9 @@ lazy_static! {
         stock_book: RwLock::new(HashbrownMap::new())
     };
 }
-
+impl Market {
+    
+}
 pub fn ipo(stock: Stock, amount: u64, price: f64) {
     {
         let mut market = MARKET.stock_book.write().unwrap();
@@ -35,7 +39,6 @@ pub fn ipo(stock: Stock, amount: u64, price: f64) {
 pub fn buy(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>){
     place_order(stock, amount, OrderType::Buy, price, lifetime)    
 }
-
 
 pub fn sell(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>){
     place_order(stock, amount, OrderType::Sell, price, lifetime)    
@@ -60,6 +63,14 @@ pub fn find_trades(_: Stock) {
     for (_, book) in market_lock.iter() {
         book.write().unwrap().find_trade();
     }
+}
+
+pub fn get_historical_data<'a>(granularity: GRANULARITY, earliest_stamp: i64, stock: Stock) -> Option<Vec<ObStat>> {
+    let market_lock =  MARKET.stock_book.read().unwrap();
+    let book = market_lock.get(&stock).unwrap().read().unwrap();
+    
+    let history = &book.history;
+    return history.get_historical_data(granularity, earliest_stamp);
 }
 
 fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){

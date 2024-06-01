@@ -3,36 +3,35 @@ use chrono::Utc;
 
 use crate::market::{market::*, order::OrderType};
 use super::{
-    request_classes::{STOCKMAP, IpoDTO, OrderDTO, StockQuery}, 
-    response_classes::PriceDTO
+    request_classes::{IpoDTO, OrderDTO, StockQuery, HistoricPriceQuery}, 
+    response_classes::{PriceDTO, HistoricPriceDTO}
 };
 
 pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<HttpResponse, Error> {
-    match STOCKMAP.get(&req.stock_name) {
-        Some(stock) => {
-            match order_type {
-                OrderType::Buy => buy(*stock, req.amount,req.price, None),
-                OrderType::Sell => sell(*stock, req.amount, req.price, None)
-            }
-            Ok(HttpResponse::Ok().finish())
-        },
-        None => Ok(HttpResponse::NotFound().body("Stock not found")),
+    match order_type {
+        OrderType::Buy => buy(req.stock, req.amount,req.price, None),
+        OrderType::Sell => sell(req.stock, req.amount, req.price, None)
     }
+    Ok(HttpResponse::Ok().finish())
 }
 
-
 pub fn handle_ipo(req: web::Json<IpoDTO>) -> Result<HttpResponse, Error> {
-    let stock = STOCKMAP.get(&req.stock_name).unwrap();
-    ipo(*stock, req.amount, req.price);
+    ipo(req.stock, req.amount, req.price);
     Ok(HttpResponse::Ok().finish())
 }
 
 pub fn handle_price(req: web::Query<StockQuery>) -> Result<HttpResponse, Error>{
-    let stock = STOCKMAP.get(&req.stock_name).unwrap();
-    
     let res = PriceDTO {
-        price: get_price(*stock),
+        price: get_price(req.stock),
         timestamp: Utc::now().timestamp_millis()
     };
-    Ok(HttpResponse::Ok().content_type("text/plain").body(serde_json::to_string(&res).unwrap()))
+    Ok(HttpResponse::Ok().content_type("text/plain").json(res))
+}
+
+pub fn handle_historical_price(req: web::Query<HistoricPriceQuery>) -> Result<HttpResponse, Error> {
+    let data = get_historical_data(req.granularity, req.earliest_stamp, req.stock);
+    match data {
+        None => Ok(HttpResponse::NotFound().body("No data matching that query!")),
+        Some(data) => Ok(HttpResponse::Ok().content_type("application/json").json(data))
+    }
 }

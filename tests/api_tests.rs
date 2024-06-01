@@ -1,11 +1,13 @@
 use FSSM::api_handler::{request_classes::*, handler::*};
 use FSSM::market::order::OrderType::*;
 use FSSM::market::market::ipo;
+use FSSM::market::order::Stock::*;
 
 
 #[cfg(test)]
 mod tests {
     use super::*;
+
     use actix_web::{test, web, http, App};
     use serde_json::json;
 
@@ -16,13 +18,13 @@ mod tests {
     async fn test_handle_buy_order_market_price() {
         // Assuming stockmap is accessible and properly initialized
         let order_dto = OrderDTO {
-            stock_name: "MSFT".to_string(),
+            stock: MSFT,
             amount: 10,
             price: None, // Market price
         };
 
         let ipo_dto = IpoDTO {
-            stock_name: "MSFT".to_string(),
+            stock: MSFT,
             amount: 10,
             price: 10.0, // Market price           
         };

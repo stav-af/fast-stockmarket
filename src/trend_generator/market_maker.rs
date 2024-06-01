@@ -1,5 +1,5 @@
 use crate::market::{
-    market::{ get_price, buy, sell }, 
+    market::{ get_price, buy, sell },
     order::Stock
 };
 extern crate statrs;

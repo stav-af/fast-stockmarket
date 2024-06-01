@@ -6,7 +6,7 @@ use super::ob_stats::{self, ObStat};
 
 
 const fn granularity_max_measurements(granularity: GRANULARITY) -> usize {
-    (next_granularity(granularity) as isize/granularity as isize) as usize
+    ((next_granularity(granularity) as isize/granularity as isize)).pow(2)  as usize
 }
 
 const fn next_granularity(granularity: GRANULARITY) -> GRANULARITY {
@@ -34,6 +34,21 @@ impl HistoryBuffer {
         }
     }
 
+    pub fn get_historical_data<'a>(&'a self, granularity: GRANULARITY, earliest_stamp: i64) -> Option<Vec<ObStat>> {
+        use GRANULARITY::*;
+        let subj = match granularity {
+            SECOND => &self.histories[0],
+            MINUTE => &self.histories[1],
+            HOUR => &self.histories[2],
+            DAY => &self.histories[3],
+            _ => return None,
+        };
+
+        let index = subj.binary_search_by(|o| o.timestamp.cmp(&earliest_stamp)).unwrap_or_else(|x| x);
+
+        Some(subj[index..].to_vec())
+    }
+
     pub fn update(&mut self, mut measurement: ObStat) {
         measurement.granularity = GRANULARITY::SECOND;
         self.histories[0].push(measurement);
@@ -43,6 +58,7 @@ impl HistoryBuffer {
         // cycles over the histories, when there are more 'seconds' measurements than seconds in a minute
         // the 'seconds' meausrements are compressed and pushed to the 'minute' array and so on
         let len = self.histories.len();
+
         for i in 0..(len - 1) {
             let (current_hist, next_hist) = self.histories.split_at_mut(i + 1);
             let current_hist = &mut current_hist[i];
@@ -55,7 +71,7 @@ impl HistoryBuffer {
     }
 
     fn downgrade_granularity(measurements:&mut Vec<ObStat>, granularity: GRANULARITY) -> Vec<ObStat> {
-        let slice_size = granularity_max_measurements(granularity) as usize;
+        let slice_size = next_granularity(granularity) as usize/ granularity as usize;
 
         let mut ret: Vec<ObStat> = Vec::new();
         while measurements.len() > slice_size {
