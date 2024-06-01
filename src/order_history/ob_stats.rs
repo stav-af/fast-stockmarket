@@ -12,12 +12,6 @@ pub struct ObStat {
     pub min_price: f64
 }
 
-pub struct TransactionRecord {
-    pub timestamp: i64,
-    pub volume: u64,
-    pub price: f64
-}
-
 impl Default for ObStat {
     fn default() -> Self {
         ObStat {

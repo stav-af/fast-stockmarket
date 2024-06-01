@@ -7,14 +7,13 @@ use chrono::Utc;
 use super::order::*;
 use crate::globals::GRANULARITY;
 use crate::order_history::*;
-use crate::order_history::ob_stats::TransactionRecord;
 use crate::timekeeper::market_time::MTime;
 
 const REPORT_FREQUENCY: GRANULARITY = GRANULARITY::SECOND;
 
 pub struct OrderBook {
     pub history: history_buffer::HistoryBuffer,
-    pub record: Vec<ob_stats::TransactionRecord>,
+    pub stats: ob_stats::ObStat,
     pub price: f64,
     stock: Stock,
     _bid: RwLock<BinaryHeap<Order>>,
@@ -25,7 +24,7 @@ impl OrderBook {
     pub fn new(stock: Stock) -> Self {
         let order_book = OrderBook {
             history: history_buffer::HistoryBuffer::new(),
-            record: Vec::new(),
+            stats: ob_stats::ObStat::default(),
             price: 0.0,
             stock: stock, 
             _bid: RwLock::new(BinaryHeap::<Order>::new()), 
@@ -90,7 +89,13 @@ impl OrderBook {
                 ask.push(sell);
             }
 
-            self.record.push(TransactionRecord { timestamp: MTime::now(), volume: trade_size, price: self.price })
+            self.stats.max_price = if self.stats.max_price < self.price {self.price} else {self.stats.max_price};
+            self.stats.min_price = if self.stats.min_price > self.price {self.price} else {self.stats.min_price};
+            self.stats.volume += trade_size;
+            if MTime::now() > self.stats.timestamp + REPORT_FREQUENCY as i64 {
+                self.history.update(self.stats);
+                self.stats = ob_stats::ObStat::default();
+            }
         }
     }
 
@@ -107,7 +112,7 @@ impl OrderBook {
         self._ask.write().unwrap().retain(retain_condition);
     }
 
-    
+
     #[cfg(test)]
     pub fn get_bids_for_testing(&self) -> std::sync::RwLockReadGuard<BinaryHeap<Order>> {
         self._bid.read().unwrap()
