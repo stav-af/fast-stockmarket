@@ -39,7 +39,7 @@ mod tests {
     }
 
     #[test]
-    fn test_obstat_gets_compressed() {
+    fn test_compress_correctly_compresses() {
         let mut h = HistoryBuffer::new();
         
         // one hour one day one minute and one second, in seconds
@@ -65,5 +65,36 @@ mod tests {
         assert!(m.len() == 1, "Expected 1 element in Minutes, got s, m, h, d, {}, {}, {}, {}", s.len(), m.len(), hr.len(), d.len());
         assert!(hr.len() == 1, "Expected 1 element in Hours, got s, m, h, d, {}, {}, {}, {}", s.len(), m.len(), hr.len(), d.len());
         assert!(d.len() == 1, "Expected 1 element in Days, got s, m, h, d, {}, {}, {}, {}", s.len(), m.len(), hr.len(), d.len());
+    
+        assert!(d[0].volume == 100 * 86400, "Expected 100 volume per second for a day 8,640,000 total, found {}", d[0].volume);
+        assert!(d[0].max_price == 10.0);
+        assert!(d[0].min_price == 1.0);
+    }
+
+    #[test]
+    fn test_compress_handles_gaps() {
+        let mut h = HistoryBuffer::new();
+        
+        // one hour one day one minute and one second, in seconds
+        let magic = 31;
+        for i in 0..magic {
+            h.histories[0].push(ObStat {
+                tick: i as u64 * 2,
+                granularity: GRANULARITY::SECOND,
+                volume: 100,
+                max_price: 10.0,
+                min_price: 1.0,
+            });
+        };
+
+        h.compress();
+
+        let s = &h.histories[0];
+        let m = &h.histories[1];
+
+        assert!(s.len() == 1, "Expected 1 element in Seconds, got s, m, {}, {}", s.len(), m.len());
+        assert!(m.len() == 1);
+
+        assert!(m[0].volume == 3000);
     }
 }
