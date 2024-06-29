@@ -53,14 +53,18 @@ impl HistoryBuffer {
                 min_price: min_p
             })
         }
-
-        todo!();
     }
 
     pub fn compress(&mut self) {
         // cycles over the histories, when there are more 'seconds' measurements than seconds in a minute
         // the 'seconds' meausrements are compressed and pushed to the 'minute' array and so on
         let len = self.histories.len();
+
+        println!("Seconds: {}", self.histories[0].len());
+        println!("Minutes: {}", self.histories[1].len());    
+        println!("Hours  : {}", self.histories[2].len());
+        println!("Days   : {}", self.histories[3].len());
+        
         for i in 0..(len - 1) {
             let (current_hist, next_hist) = self.histories.split_at_mut(i + 1);
             let current_hist = &mut current_hist[i];
