@@ -1,4 +1,4 @@
-use FSSM::market::order::*;
+use fssm::market::order::*;
 
 #[cfg(test)]
 mod tests {

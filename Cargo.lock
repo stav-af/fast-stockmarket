@@ -3,23 +3,6 @@
 version = 3
 
 [[package]]
-name = "FSSM"
-version = "0.1.0"
-dependencies = [
- "actix-cors",
- "actix-rt",
- "actix-web",
- "chrono",
- "hashbrown 0.11.2",
- "lazy_static",
- "once_cell",
- "phf",
- "serde",
- "serde_json",
- "statrs",
-]
-
-[[package]]
 name = "actix-codec"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -541,6 +524,23 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e13624c2627564efccf4934284bdd98cbaa14e79b0b5a141218e507b3a823456"
 dependencies = [
  "percent-encoding",
+]
+
+[[package]]
+name = "fssm"
+version = "0.1.0"
+dependencies = [
+ "actix-cors",
+ "actix-rt",
+ "actix-web",
+ "chrono",
+ "hashbrown 0.11.2",
+ "lazy_static",
+ "once_cell",
+ "phf",
+ "serde",
+ "serde_json",
+ "statrs",
 ]
 
 [[package]]

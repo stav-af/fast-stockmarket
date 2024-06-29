@@ -92,7 +92,7 @@ fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f
 
 pub fn get_price(stock: Stock) -> f64 {
     let lock =  MARKET.stock_book.read().unwrap();
-    let mut book = lock.get(&stock).unwrap().write().unwrap();
+    let book = lock.get(&stock).unwrap().read().unwrap();
     book.price
 }
 

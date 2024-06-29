@@ -1,6 +1,6 @@
-use FSSM::api_handler::{request_classes::*, handler::*};
-use FSSM::market::order::OrderType::*;
-use FSSM::market::market::ipo;
+use fssm::api_handler::{request_classes::*, handler::*};
+use fssm::market::order::OrderType::*;
+use fssm::market::market::ipo;
 
 
 #[cfg(test)]
