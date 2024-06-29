@@ -20,7 +20,7 @@ const fn next_granularity(granularity: GRANULARITY) -> GRANULARITY {
 }
 
 pub struct HistoryBuffer {
-    histories: Vec<Vec<ObStat>>
+    pub histories: Vec<Vec<ObStat>>
 }
 
 impl HistoryBuffer {
@@ -70,20 +70,32 @@ impl HistoryBuffer {
             let current_hist = &mut current_hist[i];
             let next_hist = &mut next_hist[0];
 
-            if !current_hist.is_empty() && current_hist.len() > granularity_max_measurements(current_hist[0].granularity) {
+            if !current_hist.is_empty() {
                 next_hist.extend(Self::downgrade_granularity(current_hist, current_hist[0].granularity));
             }
         }
     }
 
     fn downgrade_granularity(measurements:&mut Vec<ObStat>, granularity: GRANULARITY) -> Vec<ObStat> {
+        if measurements.len() == 0 {
+            return Vec::<ObStat>::new()
+        }
+
         let slice_size = granularity_max_measurements(granularity) as usize;
+        let mut last_tick_in_slice = measurements[0].tick + (slice_size as u64 - 1);
+        
+        let last = measurements.last().unwrap().tick;
 
         let mut ret: Vec<ObStat> = Vec::new();
-        while measurements.len() > slice_size {
-            let mut subject = measurements.drain(0..slice_size).peekable();
+        while (!measurements.is_empty()) && (last >= last_tick_in_slice) {
+            let index = measurements.iter()
+                .position(|m| m.tick > last_tick_in_slice)
+                .unwrap_or(measurements.len());
+            
 
-            let _timestamp = subject.peek().unwrap().tick;
+            let mut subject = measurements.drain(0..index).peekable();
+
+            let tick = subject.peek().unwrap().tick / slice_size as u64;
             let mut max: f64 = f64::MIN;
             let mut min: f64 = f64::MAX;
             let mut vol: u64 = 0;
@@ -96,12 +108,15 @@ impl HistoryBuffer {
 
             ret.push(ObStat {
                 granularity: next_granularity(granularity),
-                tick: 0,
+                tick: tick,
                 volume: vol,
                 max_price: max,
                 min_price: min
             });
+
+            last_tick_in_slice += slice_size as u64;
         }
         ret
     }
+
 }
