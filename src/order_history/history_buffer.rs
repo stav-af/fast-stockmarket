@@ -1,8 +1,8 @@
-use actix_rt::time;
+use itertools::{max, Itertools};
 
-use crate::globals::GRANULARITY;
+use crate::{globals::GRANULARITY, timekeeper::market_time::MTime};
 
-use super::ob_stats::{self, ObStat};
+use super::ob_stats::{self, ObStat, Transaction};
 
 
 const fn granularity_max_measurements(granularity: GRANULARITY) -> usize {
@@ -24,7 +24,6 @@ pub struct HistoryBuffer {
 }
 
 impl HistoryBuffer {
-    
     pub fn new() -> Self {
         // these will be second, minute, hour and day respectively.
         let histories = vec![Vec::new(), Vec::new(), Vec::new(), Vec::new()];
@@ -32,6 +31,30 @@ impl HistoryBuffer {
         Self {
             histories,
         }
+    }
+
+    pub fn process_transactions(&mut self, measurements: Vec<Transaction>){
+        // take a list of transactions, convert to histories, group by.
+        for (second_num, record) in &measurements.into_iter().group_by(|t| MTime::which_second(t.timestamp)) {
+            let mut max_p = f64::MIN;
+            let mut min_p = f64::MAX;
+            let mut vol = 0;
+            for t in record {
+                max_p = if max_p > t.price {max_p} else {t.price};
+                min_p = if min_p < t.price {min_p} else {t.price};
+                vol += t.volume;
+            }
+
+            self.histories[0].push(ObStat {
+                granularity: GRANULARITY::SECOND,
+                tick: second_num,
+                volume: vol,
+                max_price: max_p,
+                min_price: min_p
+            })
+        }
+
+        todo!();
     }
 
     pub fn update(&mut self, mut measurement: ObStat) {
@@ -61,7 +84,7 @@ impl HistoryBuffer {
         while measurements.len() > slice_size {
             let mut subject = measurements.drain(0..slice_size).peekable();
 
-            let timestamp = subject.peek().unwrap().timestamp;
+            let timestamp = subject.peek().unwrap().tick;
             let mut max: f64 = f64::MIN;
             let mut min: f64 = f64::MAX;
             let mut vol: u64 = 0;
@@ -74,7 +97,7 @@ impl HistoryBuffer {
 
             ret.push(ObStat {
                 granularity: next_granularity(granularity),
-                timestamp: timestamp,
+                tick: 0,
                 volume: vol,
                 max_price: max,
                 min_price: min

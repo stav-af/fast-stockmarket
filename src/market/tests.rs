@@ -4,7 +4,7 @@
 mod tests {
     //gpt says i don't need this, rust analyzer disagrees :(
     use crate::market::{
-        market::{get_market, ipo, buy, sell}, 
+        market::{buy, find_trades, get_market, ipo, sell}, 
         order::{Order, OrderType::*, OrderVariant, Stock}
     };
 
@@ -26,13 +26,16 @@ mod tests {
         ipo(stock, ipo_size, ipo_price);
         sell(stock, market_order_size,None, None);
         sell(stock, limit_order_size, Some(limit_order_price), None);
-
+        
+        find_trades(stock);
         _assert_top_ask(&stock, &OrderVariant::Market, market_order_size, 0.0);
         
         buy(stock, market_order_size, None, None);
+        find_trades(stock);
         _assert_top_ask(&stock, &_limit, limit_order_size, limit_order_price);
     
         buy(stock, limit_order_size, None, None);
+        find_trades(stock);
         _assert_top_ask(&stock, &_limit, ipo_size, ipo_price);
     }
 
@@ -45,10 +48,10 @@ mod tests {
         // put some unmatched orders on, sleep, clean, assert they're empty
         ipo(stock, 0, 0.0);
         buy(stock, 2, Some(100.9), Some(lifetime));
-        std::thread::sleep(std::time::Duration::from_nanos((lifetime * 2) as u64));
+        std::thread::sleep(std::time::Duration::from_nanos((lifetime * 20) as u64));
         {
             let market = get_market().read().unwrap();
-            let mut book = market.get(&stock).unwrap().write().unwrap();
+            let mut book = &mut market.get(&stock).unwrap().write().unwrap().order_book;
 
             book.clean_book();
         }
@@ -59,7 +62,7 @@ mod tests {
     fn _assert_top_ask(stock: &Stock, variant: &OrderVariant, amount: u64, price: f64){
         // unwrap  all the way into market
         let market = get_market().read().unwrap();
-        let book = market.get(&stock).unwrap().read().unwrap();
+        let book = &market.get(&stock).unwrap().read().unwrap().order_book;
         
         let ask_queue = book.get_asks_for_testing();
         let ask = ask_queue.peek();
@@ -73,7 +76,7 @@ mod tests {
     #[cfg(test)]
     fn _assert_no_bids(stock: &Stock) {
         let market = get_market().read().unwrap();
-        let book = market.get(&stock).unwrap().read().unwrap();
+        let book = &market.get(&stock).unwrap().read().unwrap().order_book;
 
         let bid_queue = book.get_bids_for_testing();
         println!("empty {}", bid_queue.is_empty());

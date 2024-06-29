@@ -3,6 +3,7 @@ use std::collections::BinaryHeap;
 use std::sync::RwLock;
 
 use chrono::Utc;
+use ob_stats::Transaction;
 
 use super::order::*;
 use crate::globals::GRANULARITY;
@@ -12,7 +13,7 @@ use crate::timekeeper::market_time::MTime;
 const REPORT_FREQUENCY: GRANULARITY = GRANULARITY::SECOND;
 
 pub struct OrderBook {
-    pub history: history_buffer::HistoryBuffer,
+    pub transaction_record: Vec<Transaction>,
     pub stats: ob_stats::ObStat,
     pub price: f64,
     stock: Stock,
@@ -23,7 +24,7 @@ pub struct OrderBook {
 impl OrderBook {
     pub fn new(stock: Stock) -> Self {
         let order_book = OrderBook {
-            history: history_buffer::HistoryBuffer::new(),
+            transaction_record: Vec::<Transaction>::new(),
             stats: ob_stats::ObStat::default(),
             price: 0.0,
             stock: stock, 
@@ -89,13 +90,12 @@ impl OrderBook {
                 ask.push(sell);
             }
 
-            self.stats.max_price = if self.stats.max_price < self.price {self.price} else {self.stats.max_price};
-            self.stats.min_price = if self.stats.min_price > self.price {self.price} else {self.stats.min_price};
-            self.stats.volume += trade_size;
-            if MTime::now() > self.stats.timestamp + REPORT_FREQUENCY as i64 {
-                self.history.update(self.stats);
-                self.stats = ob_stats::ObStat::default();
-            }
+            self.transaction_record.push(Transaction {
+                transaction_id: None,
+                price: self.price,
+                volume: trade_size,
+                timestamp: MTime::now(),
+            });
         }
     }
 
