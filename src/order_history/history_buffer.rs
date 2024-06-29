@@ -1,8 +1,8 @@
-use itertools::{max, Itertools};
+use itertools::Itertools;
 
 use crate::{globals::GRANULARITY, timekeeper::market_time::MTime};
 
-use super::ob_stats::{self, ObStat, Transaction};
+use super::ob_stats::{ObStat, Transaction};
 
 
 const fn granularity_max_measurements(granularity: GRANULARITY) -> usize {
@@ -57,11 +57,6 @@ impl HistoryBuffer {
         todo!();
     }
 
-    pub fn update(&mut self, mut measurement: ObStat) {
-        measurement.granularity = GRANULARITY::SECOND;
-        self.histories[0].push(measurement);
-    }
-
     pub fn compress(&mut self) {
         // cycles over the histories, when there are more 'seconds' measurements than seconds in a minute
         // the 'seconds' meausrements are compressed and pushed to the 'minute' array and so on
@@ -84,7 +79,7 @@ impl HistoryBuffer {
         while measurements.len() > slice_size {
             let mut subject = measurements.drain(0..slice_size).peekable();
 
-            let timestamp = subject.peek().unwrap().tick;
+            let _timestamp = subject.peek().unwrap().tick;
             let mut max: f64 = f64::MIN;
             let mut min: f64 = f64::MAX;
             let mut vol: u64 = 0;

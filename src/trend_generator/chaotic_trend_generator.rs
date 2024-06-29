@@ -2,7 +2,7 @@ use std::sync::Mutex;
 use lazy_static::lazy_static;
 
 use crate::market::market::{buy, sell};
-use crate::market::order::{ Stock, OrderType };
+use crate::market::order::Stock;
 
 const LORENZ_ITERATIONS: u64 = 100;
 const ACTION_ITERATIONS: u64 = 500;
@@ -59,7 +59,6 @@ pub fn lorenz_dy() -> f64 {
 
 pub fn generate_trend(stock: Stock) {
     // let mut momentum = *_momentum.lock().unwrap();
-    use OrderType::*;
     for _ in 0..ACTION_ITERATIONS {
         let trend = lorenz_dy();
         

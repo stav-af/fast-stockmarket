@@ -2,15 +2,12 @@ use std::cmp;
 use std::collections::BinaryHeap;
 use std::sync::RwLock;
 
-use chrono::Utc;
 use ob_stats::Transaction;
 
 use super::order::*;
-use crate::globals::GRANULARITY;
+
 use crate::order_history::*;
 use crate::timekeeper::market_time::MTime;
-
-const REPORT_FREQUENCY: GRANULARITY = GRANULARITY::SECOND;
 
 pub struct OrderBook {
     pub transaction_record: Vec<Transaction>,
@@ -72,12 +69,12 @@ impl OrderBook {
                         // println!("Sold at {}", self.price);
 
                     }
-                ((Market, Limit { price }) |
-                (Limit { price }, Market )) => {
+                (Market, Limit { price }) |
+                (Limit { price }, Market ) => {
                     self.price = *price;
                 }
                 _ => { 
-                    let market_price = self.price;
+                    // let market_price = self.price;
                 }
             }
             let trade_size = cmp::min(buy.details.amount, sell.details.amount);

@@ -2,7 +2,6 @@ use std::sync::RwLock;
 
 use lazy_static::lazy_static;
 use hashbrown::HashMap as HashbrownMap; // Optional, replace HashMap with HashbrownMap if using hashbrown
-use chrono::Utc;
 
 use super::order::*;
 use super::book::*;
@@ -77,7 +76,9 @@ pub fn compress_histories(_: Stock) {
             .unwrap_or(transactions.len());
 
         let whole_seconds = transactions.drain(0..index).collect::<Vec<Transaction>>();
+        
         stock_record.history.process_transactions(whole_seconds);
+        stock_record.history.compress();
     }
 }
 

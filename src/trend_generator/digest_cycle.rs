@@ -1,7 +1,6 @@
 use std::time::{Duration, Instant};
 use std::thread;
 
-use crate::globals::ACCELERATION_PARAMETER;
 use crate::market::order::Stock;
 use crate::market::market::{clean_books, find_trades, compress_histories};
 
@@ -11,7 +10,6 @@ use super::{market_maker::straddle, chaotic_trend_generator::generate_trend};
 const TICKRATE: f64 = 10000.0;
 
 pub fn make_market(stock: Stock) {
-    println!("Making market");
     
     dispatch(generate_trend, stock, TICKRATE);
     dispatch(straddle, stock, TICKRATE);

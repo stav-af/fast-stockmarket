@@ -1,7 +1,7 @@
 use std::thread;
 
 use actix_cors::Cors;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Responder, Error};
+use actix_web::{get, post, web, App, HttpResponse, HttpServer, Error};
 
 mod market;
 mod api_handler;
