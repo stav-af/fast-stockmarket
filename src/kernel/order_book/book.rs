@@ -5,7 +5,7 @@ use std::sync::RwLock;
 use super::record::*;
 
 use crate::kernel::market_time::market_time::MTime;
-use crate::classes::shared::order::*;
+use crate::classes::shared::{order::*, transaction::*};
 
 pub struct OrderBook {
     pub transaction_record: Vec<Transaction>,

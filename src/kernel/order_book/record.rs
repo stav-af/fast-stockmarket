@@ -2,6 +2,7 @@ use itertools::Itertools;
 
 use crate::globals::GRANULARITY;
 use crate::kernel::market_time::market_time::MTime;
+use crate::classes::shared::transaction::*;
 
 const fn granularity_max_measurements(granularity: GRANULARITY) -> usize {
     (next_granularity(granularity) as isize/granularity as isize) as usize
@@ -44,13 +45,6 @@ pub struct ObStat {
     pub close: f64
 }
 
-#[derive(Copy, Clone)]
-pub struct Transaction {
-    pub transaction_id: Option<u64>,
-    pub price: f64,
-    pub volume: u64,
-    pub timestamp: i64
-}
 
 impl Default for ObStat {
     fn default() -> Self {
@@ -77,7 +71,7 @@ impl HistoryBuffer {
         }
     }
 
-    pub fn process_transactions(&mut self, measurements: Vec<Transaction>){
+    pub fn process_transactions(&mut self, measurements: &Vec<Transaction>){
         // take a list of transactions, convert to _live_data, group by.
         for (second_num, record) in &measurements.iter().group_by(|t| MTime::which_second(t.timestamp)) {
             let record_vec: Vec<&Transaction> = record.collect();
