@@ -1,8 +1,8 @@
 use std::sync::Mutex;
 use lazy_static::lazy_static;
 
-use crate::market::market::{buy, sell};
-use crate::market::order::Stock;
+use crate::classes::shared::order::*;
+use crate::kernel::market::*;
 
 const LORENZ_ITERATIONS: u64 = 100;
 const ACTION_ITERATIONS: u64 = 500;

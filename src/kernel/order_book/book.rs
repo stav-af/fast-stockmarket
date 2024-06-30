@@ -2,16 +2,14 @@ use std::cmp;
 use std::collections::BinaryHeap;
 use std::sync::RwLock;
 
-use ob_stats::Transaction;
+use super::record::*;
 
-use super::order::*;
-
-use crate::order_history::*;
-use crate::timekeeper::market_time::MTime;
+use crate::kernel::market_time::market_time::MTime;
+use crate::classes::shared::order::*;
 
 pub struct OrderBook {
     pub transaction_record: Vec<Transaction>,
-    pub stats: ob_stats::ObStat,
+    pub stats: ObStat,
     pub price: f64,
     stock: Stock,
     _bid: RwLock<BinaryHeap<Order>>,
@@ -22,7 +20,7 @@ impl OrderBook {
     pub fn new(stock: Stock) -> Self {
         let order_book = OrderBook {
             transaction_record: Vec::<Transaction>::new(),
-            stats: ob_stats::ObStat::default(),
+            stats: ObStat::default(),
             price: 0.0,
             stock: stock, 
             _bid: RwLock::new(BinaryHeap::<Order>::new()), 

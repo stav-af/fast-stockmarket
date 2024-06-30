@@ -3,36 +3,34 @@ use std::thread;
 use actix_cors::Cors;
 use actix_web::{get, post, web, App, HttpResponse, HttpServer, Error};
 
-mod market;
-mod api_handler;
-mod trend_generator;
-mod order_history;
+mod kernel;
+mod handlers;
 mod globals;
-mod timekeeper;
+mod classes;
 
-use api_handler::handler;
-use trend_generator::digest_cycle;
-use market::order::Stock;
-
+use handlers::api_handler::*;
+use classes::shared::order::*;
+use classes::api::*;
+use kernel::market;
 
 #[post("/buy")]
-async fn buy(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
-    handler::handle_order(details, market::order::OrderType::Buy)
+async fn buy(details: web::Json<request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
+    handle_order(details, OrderType::Buy)
 }
 
 #[post("/sell")]
-async fn sell(details: web::Json<api_handler::request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
-    handler::handle_order(details, market::order::OrderType::Sell)
+async fn sell(details: web::Json<request_classes::OrderDTO>) -> Result<HttpResponse, Error> {
+    handle_order(details, OrderType::Sell)
 }
 
 #[post("/ipo")]
-async fn ipo(details: web::Json<api_handler::request_classes::IpoDTO>) -> Result<HttpResponse, Error> {
-    handler::handle_ipo(details)
+async fn ipo(details: web::Json<request_classes::IpoDTO>) -> Result<HttpResponse, Error> {
+    handle_ipo(details)
 }
 
 #[get("/price")]
-async fn price(query: web::Query<api_handler::request_classes::StockQuery>) -> Result<HttpResponse, Error> {
-    handler::handle_price(query)
+async fn price(query: web::Query<request_classes::StockQuery>) -> Result<HttpResponse, Error> {
+    handle_price(query)
 }
 
 #[actix_web::main]
@@ -41,11 +39,11 @@ async fn main() -> std::io::Result<()> {
     
     let stock_list = vec![MSFT];
     for stock in stock_list {
-        market::market::ipo(stock, 1, 10.0);
+        market::ipo(stock, 1, 10.0);
 
         thread::spawn(move || { 
             // println!("Started digesst for {:?}", stock);
-            digest_cycle::make_market(stock);
+            kernel::agents::digest_cycle::make_market(stock);
         });
     }
 

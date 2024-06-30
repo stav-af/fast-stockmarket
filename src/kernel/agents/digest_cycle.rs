@@ -1,10 +1,11 @@
 use std::time::{Duration, Instant};
 use std::thread::{spawn, sleep};
 
-use crate::market::order::Stock;
-use crate::market::market::{clean_books, find_trades, compress_histories};
+use crate::classes::shared::order::*;
 
-use super::{market_maker::straddle, chaotic_trend_generator::generate_trend};
+use super::trend::{chaotic_trend_generator::*, market_maker::*};
+// TODO: Refactor this into somewhere else
+use crate::kernel::market::*;
 
 // ticks per second, should describe the max tickrate
 const TICKRATE: f64 = 10000.0;

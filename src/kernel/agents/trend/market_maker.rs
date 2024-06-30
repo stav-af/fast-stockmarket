@@ -1,10 +1,10 @@
-use crate::market::{
-    market::{ get_price, buy, sell }, 
-    order::Stock
-};
 extern crate statrs;
+
 use statrs::{distribution::Normal, statistics::Distribution};
 use std::f64::consts::PI;
+
+use crate::classes::shared::order::*;
+use crate::kernel::market::*;
 
 // VALUES CONTROL THE TRAILING BUY/SELLS
 const NUM_TRAIL_LEVELS: u64 = 50;

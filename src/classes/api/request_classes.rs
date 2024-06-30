@@ -1,7 +1,7 @@
 use serde::{Deserialize, Serialize};
 use phf::phf_map;
 
-use crate::market::order::Stock;
+use super::super::shared::order::Stock;
 
 #[derive(Deserialize, Serialize)]
 pub struct OrderDTO {

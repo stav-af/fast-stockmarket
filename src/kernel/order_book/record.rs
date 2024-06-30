@@ -1,9 +1,7 @@
 use itertools::Itertools;
 
-use crate::{globals::GRANULARITY, timekeeper::market_time::MTime};
-
-use super::ob_stats::{ObStat, Transaction};
-
+use crate::globals::GRANULARITY;
+use crate::kernel::market_time::market_time::MTime;
 
 const fn granularity_max_measurements(granularity: GRANULARITY) -> usize {
     (next_granularity(granularity) as isize/granularity as isize) as usize
@@ -33,6 +31,39 @@ const fn next_granularity(granularity: GRANULARITY) -> GRANULARITY {
 pub struct HistoryBuffer {
     pub _live_data: Vec<Vec<ObStat>>,
     pub _historic_data: Vec<Vec<ObStat>>
+}
+
+#[derive(Copy, Clone)]
+pub struct ObStat {
+    pub tick: u64,
+    pub granularity: GRANULARITY, 
+    pub volume: u64,
+    pub high: f64,
+    pub low: f64,
+    pub open: f64,
+    pub close: f64
+}
+
+#[derive(Copy, Clone)]
+pub struct Transaction {
+    pub transaction_id: Option<u64>,
+    pub price: f64,
+    pub volume: u64,
+    pub timestamp: i64
+}
+
+impl Default for ObStat {
+    fn default() -> Self {
+        ObStat {
+            tick: 0,
+            granularity: GRANULARITY::INSTANT,
+            volume: 0,
+            high: f64::MIN,
+            low: f64::MAX,
+            open: 0.0,
+            close: 0.0
+        }
+    }
 }
 
 impl HistoryBuffer {

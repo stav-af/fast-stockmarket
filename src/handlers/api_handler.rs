@@ -1,11 +1,11 @@
 use actix_web::{web, HttpResponse, Error};
 use chrono::Utc;
 
-use crate::market::{market::*, order::OrderType};
-use super::{
-    request_classes::{STOCKMAP, IpoDTO, OrderDTO, StockQuery}, 
-    response_classes::PriceDTO
+use crate::classes::{
+    api::{request_classes::*, response_classes::*},
+    shared::order::*
 };
+use crate::kernel::market::*;
 
 pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<HttpResponse, Error> {
     match STOCKMAP.get(&req.stock_name) {

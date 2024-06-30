@@ -1,7 +1,7 @@
-use fssm::api_handler::{request_classes::*, handler::*};
-use fssm::market::order::OrderType::*;
-use fssm::market::market::ipo;
+use fssm::classes::api::{request_classes::*, response_classes::*};
 
+use fssm::handlers::api_handler::*;
+use fssm::classes::shared::order::OrderType::*;
 
 #[cfg(test)]
 mod tests {
