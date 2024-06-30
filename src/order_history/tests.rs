@@ -125,4 +125,36 @@ mod tests {
         assert!(ob_stat.open == 0.0);
         assert!(ob_stat.close == 9.0); 
     }
+
+    #[test]
+    fn test_historical_data_populated_correctly(){
+        let mut h = HistoryBuffer::new();
+        
+        // one hour one day one minute and one second, in seconds
+        let magic = 90;
+        for i in 0..magic {
+            h._live_data[0].push(ObStat {
+                tick: i,
+                granularity: GRANULARITY::SECOND,
+                volume: 100,
+                high: 10.0,
+                low: 1.0,
+                open: 0.0,
+                close: 0.0
+            });
+        };
+
+        h.compress();
+
+        let l_s = &h._live_data[0];
+        let l_m = &h._live_data[1];
+
+        let h_s = &&h._historic_data[0];
+        let h_m = &h._historic_data[1];
+
+        assert!(l_s.len() == 30, "Expected 30 live seconds, found: {}", l_s.len());
+        assert!(l_m.len() == 1);
+        assert!(h_s.len() == 60);
+        assert!(h_m.len() == 0)
+    }
 }
