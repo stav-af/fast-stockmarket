@@ -35,11 +35,13 @@ impl HistoryBuffer {
 
     pub fn process_transactions(&mut self, measurements: Vec<Transaction>){
         // take a list of transactions, convert to histories, group by.
-        for (second_num, record) in &measurements.into_iter().group_by(|t| MTime::which_second(t.timestamp)) {
+        for (second_num, record) in &measurements.iter().group_by(|t| MTime::which_second(t.timestamp)) {
+            let record_vec: Vec<&Transaction> = record.collect();
+
             let mut max_p = f64::MIN;
             let mut min_p = f64::MAX;
             let mut vol = 0;
-            for t in record {
+            for t in &record_vec {
                 max_p = if max_p > t.price {max_p} else {t.price};
                 min_p = if min_p < t.price {min_p} else {t.price};
                 vol += t.volume;
@@ -49,8 +51,10 @@ impl HistoryBuffer {
                 granularity: GRANULARITY::SECOND,
                 tick: second_num,
                 volume: vol,
-                max_price: max_p,
-                min_price: min_p
+                high: max_p,
+                low: min_p,
+                open: record_vec[0].price,
+                close: record_vec.last().unwrap().price
             })
         }
     }
@@ -84,25 +88,27 @@ impl HistoryBuffer {
         let slice_size = granularity_max_measurements(granularity) as usize;
         let mut last_tick_in_slice = measurements[0].tick + (slice_size as u64 - 1);
         
-        let last = measurements.last().unwrap().tick;
+        let last_tick = measurements.last().unwrap().tick;
 
         let mut ret: Vec<ObStat> = Vec::new();
-        while (!measurements.is_empty()) && (last >= last_tick_in_slice) {
+        while (!measurements.is_empty()) && (last_tick >= last_tick_in_slice) {
             let index = measurements.iter()
                 .position(|m| m.tick > last_tick_in_slice)
                 .unwrap_or(measurements.len());
             
 
-            let mut subject = measurements.drain(0..index).peekable();
-
-            let tick = subject.peek().unwrap().tick / slice_size as u64;
+            let subject: Vec<ObStat> = measurements.drain(0..index).collect();
+            
+            let first = subject[0];
+            let tick = first.tick / slice_size as u64;
+            
             let mut max: f64 = f64::MIN;
             let mut min: f64 = f64::MAX;
             let mut vol: u64 = 0;
 
-            for m in subject {
-                max = if max > m.max_price {max} else {m.max_price};
-                min = if min < m.min_price {min} else {m.min_price};
+            for m in &subject {
+                max = if max > m.high {max} else {m.high};
+                min = if min < m.low {min} else {m.low};
                 vol += m.volume;
             }
 
@@ -110,8 +116,10 @@ impl HistoryBuffer {
                 granularity: next_granularity(granularity),
                 tick: tick,
                 volume: vol,
-                max_price: max,
-                min_price: min
+                high: max,
+                low: min,
+                open: first.open,
+                close: subject.last().unwrap().close
             });
 
             last_tick_in_slice += slice_size as u64;

@@ -34,8 +34,8 @@ mod tests {
         let ob_stat = h.histories[0][0];
         assert!(ob_stat.volume == 100);
         assert!(ob_stat.tick == 0);
-        assert!(ob_stat.max_price == 9.0);
-        assert!(ob_stat.min_price == 0.0);
+        assert!(ob_stat.high == 9.0);
+        assert!(ob_stat.low == 0.0);
     }
 
     #[test]
@@ -49,8 +49,10 @@ mod tests {
                 tick: i as u64,
                 granularity: GRANULARITY::SECOND,
                 volume: 100,
-                max_price: 10.0,
-                min_price: 1.0,
+                high: 10.0,
+                low: 1.0,
+                open: 0.0,
+                close: 0.0
             });
         };
 
@@ -67,8 +69,8 @@ mod tests {
         assert!(d.len() == 1, "Expected 1 element in Days, got s, m, h, d, {}, {}, {}, {}", s.len(), m.len(), hr.len(), d.len());
     
         assert!(d[0].volume == 100 * 86400, "Expected 100 volume per second for a day 8,640,000 total, found {}", d[0].volume);
-        assert!(d[0].max_price == 10.0);
-        assert!(d[0].min_price == 1.0);
+        assert!(d[0].high == 10.0);
+        assert!(d[0].low == 1.0);
     }
 
     #[test]
@@ -82,8 +84,10 @@ mod tests {
                 tick: i as u64 * 2,
                 granularity: GRANULARITY::SECOND,
                 volume: 100,
-                max_price: 10.0,
-                min_price: 1.0,
+                high: 10.0,
+                low: 1.0,
+                open: 0.0,
+                close: 0.0
             });
         };
 

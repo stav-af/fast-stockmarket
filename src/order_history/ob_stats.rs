@@ -5,8 +5,10 @@ pub struct ObStat {
     pub tick: u64,
     pub granularity: GRANULARITY, 
     pub volume: u64,
-    pub max_price: f64,
-    pub min_price: f64
+    pub high: f64,
+    pub low: f64,
+    pub open: f64,
+    pub close: f64
 }
 
 #[derive(Copy, Clone)]
@@ -23,8 +25,10 @@ impl Default for ObStat {
             tick: 0,
             granularity: GRANULARITY::INSTANT,
             volume: 0,
-            max_price: f64::MIN,
-            min_price: f64::MAX,
+            high: f64::MIN,
+            low: f64::MAX,
+            open: 0.0,
+            close: 0.0
         }
     }
 }
