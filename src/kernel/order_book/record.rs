@@ -8,7 +8,7 @@ const fn granularity_max_measurements(granularity: GRANULARITY) -> usize {
     (next_granularity(granularity) as isize/granularity as isize) as usize
 }
 
-const fn granularity_index(granularity: GRANULARITY) -> usize {
+pub const fn granularity_index(granularity: GRANULARITY) -> usize {
      match granularity {
         GRANULARITY::SECOND => 0,
         GRANULARITY::MINUTE => 1,
