@@ -2,14 +2,14 @@ mod tests {
     use crate::{globals::{GRANULARITY, ACCELERATION_PARAMETER}, order_history::{history_buffer::HistoryBuffer, ob_stats::{ObStat, Transaction}}};
 
     #[test]
-    fn test_histories_intializes_empty() {
+    fn test__live_data_intializes_empty() {
         let hist = HistoryBuffer::new();
 
-        let hist_len = hist.histories.len(); 
-        assert!(hist_len == 4, "Expected 4 histories, but found {} histories", hist_len);
+        let hist_len = hist._live_data.len(); 
+        assert!(hist_len == 4, "Expected 4 _live_data, but found {} histories", hist_len);
     
-        for (i, h) in hist.histories.iter().enumerate() {
-            assert!(h.len() == 0, "Expected new history to be empty, found len {}, at histories {}", h.len(), i)
+        for (i, h) in hist._live_data.iter().enumerate() {
+            assert!(h.len() == 0, "Expected new history to be empty, found len {}, at _live_data {}", h.len(), i)
         }
     }
 
@@ -28,10 +28,10 @@ mod tests {
         );
         h.compress();
 
-        assert!(h.histories[0].len() != 0, "Expected process_transactions to append to h[0] (Seconds history)");
-        assert!(h.histories[1..4].iter().map(|x| x.len()).sum::<usize>() == 0, "Expected all histories apart from seconds to be empty");
+        assert!(h._live_data[0].len() != 0, "Expected process_transactions to append to h[0] (Seconds history)");
+        assert!(h._live_data[1..4].iter().map(|x| x.len()).sum::<usize>() == 0, "Expected all histories apart from seconds to be empty");
 
-        let ob_stat = h.histories[0][0];
+        let ob_stat = h._live_data[0][0];
         assert!(ob_stat.volume == 100);
         assert!(ob_stat.tick == 0);
         assert!(ob_stat.high == 9.0);
@@ -45,7 +45,7 @@ mod tests {
         // one hour one day one minute and one second, in seconds
         let magic = 86400 + 3661;
         for i in 0..magic {
-            h.histories[0].push(ObStat {
+            h._live_data[0].push(ObStat {
                 tick: i as u64,
                 granularity: GRANULARITY::SECOND,
                 volume: 100,
@@ -58,10 +58,10 @@ mod tests {
 
         h.compress();
 
-        let s = &h.histories[0];
-        let m = &h.histories[1];
-        let hr = &h.histories[2];
-        let d = &h.histories[3];
+        let s = &h._live_data[0];
+        let m = &h._live_data[1];
+        let hr = &h._live_data[2];
+        let d = &h._live_data[3];
 
         assert!(s.len() == 1, "Expected 1 element in Seconds, got s, m, h, d, {}, {}, {}, {}", s.len(), m.len(), hr.len(), d.len());
         assert!(m.len() == 1, "Expected 1 element in Minutes, got s, m, h, d, {}, {}, {}, {}", s.len(), m.len(), hr.len(), d.len());
@@ -80,7 +80,7 @@ mod tests {
         // one hour one day one minute and one second, in seconds
         let magic = 31;
         for i in 0..magic {
-            h.histories[0].push(ObStat {
+            h._live_data[0].push(ObStat {
                 tick: i as u64 * 2,
                 granularity: GRANULARITY::SECOND,
                 volume: 100,
@@ -93,12 +93,36 @@ mod tests {
 
         h.compress();
 
-        let s = &h.histories[0];
-        let m = &h.histories[1];
+        let s = &h._live_data[0];
+        let m = &h._live_data[1];
 
         assert!(s.len() == 1, "Expected 1 element in Seconds, got s, m, {}, {}", s.len(), m.len());
         assert!(m.len() == 1);
 
         assert!(m[0].volume == 3000);
+    }
+
+    #[test]
+    fn test_reporting_open_close_prices() {
+        let mut h = HistoryBuffer::new();
+
+        let vals = 0..10;
+        h.process_transactions(
+            vals.map(|i| Transaction {
+                transaction_id: None,
+                price: i as f64,
+                volume: 10,
+                timestamp: 1,
+            }).collect()
+        );
+        h.compress();
+
+        let ob_stat = h._live_data[0][0];
+        assert!(ob_stat.volume == 100);
+        assert!(ob_stat.tick == 0);
+        assert!(ob_stat.high == 9.0);
+        assert!(ob_stat.low == 0.0);
+        assert!(ob_stat.open == 0.0);
+        assert!(ob_stat.close == 9.0); 
     }
 }

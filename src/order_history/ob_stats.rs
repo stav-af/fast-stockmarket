@@ -32,3 +32,8 @@ impl Default for ObStat {
         }
     }
 }
+
+struct ObStatBuff<const SLOTS: usize> {
+    _curr: usize,
+    _stats: [ObStat; SLOTS]
+}
