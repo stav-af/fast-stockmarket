@@ -7,3 +7,16 @@ pub struct Transaction {
     pub volume: u64,
     pub timestamp: i64
 }
+
+impl Transaction {
+    pub fn default() -> Self {
+        Transaction {
+            transaction_id: None,
+            buy_id: None,
+            sell_id: None,
+            price: 0.0,
+            volume: 0,
+            timestamp: 0,
+        }
+    }
+}

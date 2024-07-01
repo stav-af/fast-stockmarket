@@ -1,10 +1,10 @@
 use std::sync::RwLock;
 
-use itertools::Itertools;
 use lazy_static::lazy_static;
 use hashbrown::HashMap as HashbrownMap; // Optional, replace HashMap with HashbrownMap if using hashbrown
+use circular_buffer::CircularBuffer;
 
-use super::order_book::{book::*, record::{self, *}, stats::*};
+use super::order_book::{book::*, record::*, stats::*};
 use super::market_time::market_time::*;
 
 use crate::classes::shared::order::*;
@@ -18,7 +18,8 @@ pub struct Market {
 pub struct StockRecord {
     pub order_book: OrderBook,
     pub history: HistoryBuffer,
-    pub stats: Stats
+    pub stats: Stats,
+    pub recent_transactions: CircularBuffer<100, Transaction>
 }
 
 impl StockRecord {
@@ -26,12 +27,22 @@ impl StockRecord {
         StockRecord {
             order_book: OrderBook::new(stock),
             history: HistoryBuffer::new(),
-            stats: Stats::new()
+            stats: Stats::new(),
+            recent_transactions: CircularBuffer::<100, Transaction>::new()
         }
     }
 
     fn update_stats(&mut self) {
         self.stats.update_stats(&self.history._historic_data)
+    }
+
+    fn report_transactions(&mut self){
+        // push all transactions with an associated Id to recent_transactions
+        // to be polled by buy/sell user requests
+        self.recent_transactions.extend(
+            self.order_book.transaction_record.iter().filter(
+                |t| t.buy_id != None || t.sell_id != None)
+            )
     }
 }
 
@@ -74,13 +85,14 @@ pub fn find_trades(stock: Stock) {
     book.find_trade();
 }
 
-pub fn compress_histories(stock: Stock) -> Vec<Transaction>{
+pub fn report_transactions(stock: Stock) -> Vec<Transaction>{
     let lock =  MARKET.stock_book.read().unwrap();
     let record = &mut lock.get(&stock).unwrap().write().unwrap();
+    record.report_transactions();
 
     let transactions = &mut record.order_book.transaction_record;
     let last_second_timestamp = MTime::which_second(transactions.last().unwrap().timestamp) * GRANULARITY::SECOND as u64;
-
+    
     let index = transactions.iter()
         .position(|x| x.timestamp > last_second_timestamp as i64)
         .unwrap_or(transactions.len());
