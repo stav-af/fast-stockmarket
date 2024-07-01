@@ -25,7 +25,7 @@ impl StockRecord {
         StockRecord {
             order_book: OrderBook::new(stock),
             history: HistoryBuffer::new(),
-            stats: Stats {}
+            stats: Stats::new()
         }
     }
 }
@@ -87,6 +87,15 @@ pub fn compress_histories(stock: Stock) -> Vec<Transaction>{
     stock_record.compress();
 
     whole_seconds
+}
+
+pub fn record_stats(stock: Stock) {
+    let lock =  MARKET.stock_book.read().unwrap();
+    let data = &mut lock.get(&stock).unwrap().write().unwrap().history._historic_data;
+    
+    let historic_data = &record.history._historic_data;
+    record.stats.update_volatilities(historic_data);
+
 }
 
 fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
