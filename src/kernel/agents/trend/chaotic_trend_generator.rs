@@ -73,10 +73,10 @@ pub fn generate_trend(stock: Stock) {
 
         if trend > 0.0 {
             // println!("CHAOS: bought: {}", size);
-            buy(stock, size, None, None);
+            buy(stock, size, None, None, None);
         } else {
             // println!("CHAOS: sold {}", size);
-            sell(stock, size, None, None);
+            sell(stock, size, None, None, None);
         }
     }
 }

@@ -23,18 +23,18 @@ mod tests {
         let stock: Stock = Stock::AAPL;
 
         // ipo, then offer sells at a better price, see if they're at the front of the ask queue
-        ipo(stock, ipo_size, ipo_price);
-        sell(stock, market_order_size,None, None);
-        sell(stock, limit_order_size, Some(limit_order_price), None);
+        ipo(stock, ipo_size, ipo_price, None);
+        sell(stock, market_order_size,None, None, None);
+        sell(stock, limit_order_size, Some(limit_order_price), None, None);
         
         find_trades(stock);
         _assert_top_ask(&stock, &OrderVariant::Market, market_order_size, 0.0);
         
-        buy(stock, market_order_size, None, None);
+        buy(stock, market_order_size, None, None, None);
         find_trades(stock);
         _assert_top_ask(&stock, &_limit, limit_order_size, limit_order_price);
     
-        buy(stock, limit_order_size, None, None);
+        buy(stock, limit_order_size, None, None, None);
         find_trades(stock);
         _assert_top_ask(&stock, &_limit, ipo_size, ipo_price);
     }
@@ -46,8 +46,8 @@ mod tests {
         let lifetime = 100;
 
         // put some unmatched orders on, sleep, clean, assert they're empty
-        ipo(stock, 0, 0.0);
-        buy(stock, 2, Some(100.9), Some(lifetime));
+        ipo(stock, 0, 0.0, None);
+        buy(stock, 2, Some(100.9), Some(lifetime), None);
         std::thread::sleep(std::time::Duration::from_nanos((lifetime * 20) as u64));
         {
             let market = get_market().read().unwrap();
@@ -108,7 +108,7 @@ mod tests {
 
 
     #[test]
-    fn test__live_data_intializes_empty() {
+    fn test_live_data_intializes_empty() {
         let hist = HistoryBuffer::new();
 
         let hist_len = hist._live_data.len(); 
@@ -127,6 +127,8 @@ mod tests {
         h.process_transactions(
             &vals.map(|i| Transaction {
                 transaction_id: None,
+                buy_id: None,
+                sell_id: None,
                 price: i as f64,
                 volume: 10,
                 timestamp: 1,
@@ -216,6 +218,8 @@ mod tests {
         h.process_transactions(
             &vals.map(|i| Transaction {
                 transaction_id: None,
+                buy_id: None,
+                sell_id: None,
                 price: i as f64,
                 volume: 10,
                 timestamp: 1,
@@ -263,4 +267,6 @@ mod tests {
         assert!(h_s.len() == 60);
         assert!(h_m.len() == 0)
     }
+
+
 }

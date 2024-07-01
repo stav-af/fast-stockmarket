@@ -76,6 +76,8 @@ impl OrderBook {
                 }
             }
             let trade_size = cmp::min(buy.details.amount, sell.details.amount);
+            let buy_id = buy.id;
+            let sell_id = sell.id;
 
             if buy.details.amount > trade_size {
                 buy.details.amount -= trade_size;
@@ -87,6 +89,8 @@ impl OrderBook {
 
             self.transaction_record.push(Transaction {
                 transaction_id: None,
+                buy_id: buy_id,
+                sell_id: sell_id,
                 price: self.price,
                 volume: trade_size,
                 timestamp: MTime::now(),

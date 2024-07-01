@@ -39,7 +39,7 @@ async fn main() -> std::io::Result<()> {
     
     let stock_list = vec![MSFT];
     for stock in stock_list {
-        market::ipo(stock, 1, 10.0);
+        market::ipo(stock, 1, 10.0, None);
 
         thread::spawn(move || { 
             // println!("Started digesst for {:?}", stock);

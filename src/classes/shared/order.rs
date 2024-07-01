@@ -30,6 +30,7 @@ pub struct OrderDetails {
 
 #[derive(Debug)]
 pub struct Order {
+    pub id: Option<u64>,
     pub order_type: OrderType,
     pub variant: OrderVariant,
     pub details: OrderDetails

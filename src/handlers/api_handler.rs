@@ -11,8 +11,8 @@ pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<H
     match STOCKMAP.get(&req.stock_name) {
         Some(stock) => {
             match order_type {
-                OrderType::Buy => buy(*stock, req.amount,req.price, None),
-                OrderType::Sell => sell(*stock, req.amount, req.price, None)
+                OrderType::Buy => buy(*stock, req.amount,req.price, None, None),
+                OrderType::Sell => sell(*stock, req.amount, req.price, None, None)
             }
             Ok(HttpResponse::Ok().finish())
         },
@@ -23,7 +23,7 @@ pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<H
 
 pub fn handle_ipo(req: web::Json<IpoDTO>) -> Result<HttpResponse, Error> {
     let stock = STOCKMAP.get(&req.stock_name).unwrap();
-    ipo(*stock, req.amount, req.price);
+    ipo(*stock, req.amount, req.price, None);
     Ok(HttpResponse::Ok().finish())
 }
 

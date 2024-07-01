@@ -41,7 +41,7 @@ lazy_static! {
     };
 }
 
-pub fn ipo(stock: Stock, amount: u64, price: f64) {
+pub fn ipo(stock: Stock, amount: u64, price: f64, id: Option<u64>) {
     {
         let mut market = MARKET.stock_book.write().unwrap();
         market.insert(
@@ -50,16 +50,16 @@ pub fn ipo(stock: Stock, amount: u64, price: f64) {
         );
     }
    
-    place_order(stock, amount, OrderType::Sell, Some(price), None)
+    place_order(stock, amount, OrderType::Sell, Some(price), None, id)
 }
 
-pub fn buy(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>){
-    place_order(stock, amount, OrderType::Buy, price, lifetime)    
+pub fn buy(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>, id: Option<u64>){
+    place_order(stock, amount, OrderType::Buy, price, lifetime, id)    
 }
 
 
-pub fn sell(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>){
-    place_order(stock, amount, OrderType::Sell, price, lifetime)    
+pub fn sell(stock: Stock, amount: u64, price: Option<f64>, lifetime: Option<i64>, id: Option<u64>){
+    place_order(stock, amount, OrderType::Sell, price, lifetime, id)
 }
 
 pub fn clean_books(stock: Stock) {
@@ -101,15 +101,14 @@ pub fn update_stats(stock: Stock) {
 }
 
 
-fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
+fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>, id: Option<u64>){
     if amount <= 0 {
         return;
     }
-
     // println!("placing order");
-
     use OrderVariant::*;
     let order = Order {
+        id: id,
         order_type: order_type,
         variant: match price {
             Some(p) => Limit { price: (p) },

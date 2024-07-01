@@ -37,10 +37,10 @@ pub fn straddle(stock: Stock) {
         let trade_volume = (volume * VOLUME_MULTIPLIER) as u64;
         let distance_from_price = i as f64 * TRAIL_LEVEL_GAPS;
 
-        sell(stock, trade_volume, Some(price + distance_from_price), Some(100));
+        sell(stock, trade_volume, Some(price + distance_from_price), Some(100), None);
         // buy_limit(stock, trade_volume, price + distance_from_price);
         // sell_limit(stock, trade_volume, price - distance_from_price);
-        buy(stock, trade_volume, Some(price - distance_from_price), Some(100));
+        buy(stock, trade_volume, Some(price - distance_from_price), Some(100), None);
         // println!("MARK: Sold {trade_volume} shares at {}", price + distance_from_price);
         // println!("MARK: Bought {trade_volume} shares at {}", price - distance_from_price);
     }
