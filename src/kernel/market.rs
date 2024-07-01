@@ -7,7 +7,7 @@ use circular_buffer::CircularBuffer;
 use super::order_book::{book::*, record::*, stats::*};
 use super::market_time::market_time::*;
 
-use crate::classes::shared::order::*;
+use crate::classes::shared::order::{self, *};
 use crate::classes::shared::transaction::Transaction;
 use crate::globals::*;
 
@@ -104,6 +104,53 @@ pub fn report_transactions(stock: Stock) -> Vec<Transaction>{
     stock_record.compress();
 
     whole_seconds
+}
+
+pub fn get_order_status(stock: Stock, id: u64, order_type: OrderType) -> OrderStatus { 
+    let executed = search_transaction_buffer(stock, id, order_type);
+    let pending = search_orderbook(stock, id, order_type);  
+   
+    match (executed, pending) {
+        (Some(price), false) => OrderStatus::Executed { price: price },
+        (Some(price), true) => OrderStatus::PartiallyFilled,
+        (None, true) => OrderStatus::Pending,
+        _ => panic!()
+    }
+}
+
+fn search_transaction_buffer(stock: Stock, id: u64, order_type: OrderType) -> Option<f64> {
+    let lock =  MARKET.stock_book.read().unwrap();
+    let record = &lock.get(&stock).unwrap().read().unwrap();
+    
+    let search_criteria: &dyn Fn(Transaction) -> bool;
+
+    let sell_cond = |t: Transaction| t.sell_id == Some(id);
+    let buy_cond = |t: Transaction| t.buy_id == Some(id);
+    match order_type {
+        OrderType::Sell => search_criteria = &sell_cond,
+        OrderType::Buy => search_criteria = &buy_cond
+    }
+
+    let (sum, count) = record.recent_transactions.iter()
+        .filter(|&t| search_criteria(*t))
+        .fold((0.0, 0), |(sum, count), t| (sum + t.price, count + 1));
+
+    if count > 0 {
+        let avg_price = sum / count as f64;
+        Some(avg_price)
+    } else {
+        None
+    }
+}
+
+fn search_orderbook(stock: Stock, id: u64, order_type: OrderType) -> bool {
+    let lock =  MARKET.stock_book.read().unwrap();
+    let record = &lock.get(&stock).unwrap().read().unwrap();
+
+    match order_type {
+        OrderType::Buy => record.order_book.is_pending_bid(id),
+        OrderType::Sell => record.order_book.is_pending_ask(id) 
+    }
 }
 
 pub fn update_stats(stock: Stock) {

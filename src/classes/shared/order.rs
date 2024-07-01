@@ -7,8 +7,13 @@ pub enum Stock {
     MSFT
 }
 
+pub enum OrderStatus {
+    Pending,
+    PartiallyFilled,
+    Executed {price: f64}
+}
 
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Copy, Clone)]
 pub enum OrderType {
     Buy,
     Sell

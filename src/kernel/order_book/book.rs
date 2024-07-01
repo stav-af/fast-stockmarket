@@ -111,6 +111,15 @@ impl OrderBook {
         self._ask.write().unwrap().retain(retain_condition);
     }
 
+    pub fn is_pending_ask(&self, id: u64) -> bool {
+       let asks = self._ask.read().unwrap();
+       asks.iter().any(|o| o.id == Some(id))
+    }
+
+    pub fn is_pending_bid(&self, id: u64) -> bool {
+       let asks = self._bid.read().unwrap();
+       asks.iter().any(|o| o.id == Some(id))
+    }
 
     #[cfg(test)]
     pub fn get_bids_for_testing(&self) -> std::sync::RwLockReadGuard<BinaryHeap<Order>> {
