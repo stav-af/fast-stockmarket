@@ -3,6 +3,7 @@ use std::thread::{spawn, sleep};
 
 use crate::classes::shared::order::*;
 
+use super::core::update_stats::update_stats;
 use super::trend::{chaotic_trend_generator::*, market_maker::*};
 // TODO: Refactor this into somewhere else
 use super::core::{clean_books::*, compress_histories::*, find_trades::*};
@@ -15,7 +16,8 @@ pub fn make_market(stock: Stock) {
     dispatch(straddle, stock, TICKRATE);
     dispatch(find_trades, stock, TICKRATE);
     dispatch(clean_books, stock, TICKRATE/100.0);
-    dispatch(process_transactions, stock, TICKRATE/10.0)
+    dispatch(process_transactions, stock, TICKRATE/10.0);
+    dispatch(update_stats, stock, TICKRATE/10.0);
 }
 
 fn dispatch(f: fn(Stock) -> (), stock: Stock, tickrate: f64){

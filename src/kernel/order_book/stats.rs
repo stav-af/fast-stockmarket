@@ -17,7 +17,7 @@ impl Stats {
         }
     }
 
-    pub fn update_volatilities(&mut self, history_matrix: &Vec<Vec<ObStat>>) {
+    pub fn update_stats(&mut self, history_matrix: &Vec<Vec<ObStat>>) {
         self.minute_volatility = Self::calculate_volatility(&history_matrix[0]);
         self.hour_volatility = Self::calculate_volatility(&history_matrix[1]);
         self.day_volatility = Self::calculate_volatility(&history_matrix[2]);

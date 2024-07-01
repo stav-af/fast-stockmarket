@@ -1,9 +1,10 @@
 use std::sync::RwLock;
 
+use itertools::Itertools;
 use lazy_static::lazy_static;
 use hashbrown::HashMap as HashbrownMap; // Optional, replace HashMap with HashbrownMap if using hashbrown
 
-use super::order_book::{book::*, record::*, stats::*};
+use super::order_book::{book::*, record::{self, *}, stats::*};
 use super::market_time::market_time::*;
 
 use crate::classes::shared::order::*;
@@ -27,6 +28,10 @@ impl StockRecord {
             history: HistoryBuffer::new(),
             stats: Stats::new()
         }
+    }
+
+    fn update_stats(&mut self) {
+        self.stats.update_stats(&self.history._historic_data)
     }
 }
 
@@ -89,14 +94,12 @@ pub fn compress_histories(stock: Stock) -> Vec<Transaction>{
     whole_seconds
 }
 
-pub fn record_stats(stock: Stock) {
-    let lock =  MARKET.stock_book.read().unwrap();
-    let data = &mut lock.get(&stock).unwrap().write().unwrap().history._historic_data;
-    
-    let historic_data = &record.history._historic_data;
-    record.stats.update_volatilities(historic_data);
-
+pub fn update_stats(stock: Stock) {
+    let market_lock =  MARKET.stock_book.read().unwrap();
+    let record = &mut market_lock.get(&stock).unwrap().write().unwrap();
+    record.update_stats()
 }
+
 
 fn place_order(stock: Stock, amount: u64, order_type: OrderType, price: Option<f64>, lifetime: Option<i64>){
     if amount <= 0 {
