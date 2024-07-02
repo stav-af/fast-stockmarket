@@ -20,6 +20,15 @@ pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<H
     }
 }
 
+pub fn handle_stock_history(req: web::Json<PriceHistoryDTO>) -> Result<HttpResponse, Error> {
+    match STOCKMAP.get(&req.stock_name) {
+        Some(stock) => {
+            let ret = get_stock_history(*stock, req.granularity, req.count);
+            Ok(HttpResponse::Ok().json(ret))
+        }
+        None => Ok(HttpResponse::NotFound().body("Stock not found"))
+    }
+}
 
 pub fn handle_ipo(req: web::Json<IpoDTO>) -> Result<HttpResponse, Error> {
     let stock = STOCKMAP.get(&req.stock_name).unwrap();

@@ -7,6 +7,7 @@ use circular_buffer::CircularBuffer;
 use super::order_book::{book::*, record::*, stats::*};
 use super::market_time::market_time::*;
 
+use crate::classes::api::response_classes::StockHistoryDTO;
 use crate::classes::shared::order::{self, *};
 use crate::classes::shared::transaction::Transaction;
 use crate::globals::*;
@@ -112,7 +113,7 @@ pub fn get_order_status(stock: Stock, id: u64, order_type: OrderType) -> OrderSt
    
     match (executed, pending) {
         (Some(price), false) => OrderStatus::Executed { price: price },
-        (Some(price), true) => OrderStatus::PartiallyFilled,
+        (Some(_), true) => OrderStatus::PartiallyFilled,
         (None, true) => OrderStatus::Pending,
         _ => panic!()
     }
@@ -189,6 +190,23 @@ pub fn get_price(stock: Stock) -> f64 {
     let lock =  MARKET.stock_book.read().unwrap();
     let book = &lock.get(&stock).unwrap().read().unwrap().order_book;
     book.price
+}
+
+pub fn get_stock_history(stock: Stock, granularity: GRANULARITY, count: usize) -> Vec<StockHistoryDTO> {
+    let lock =  MARKET.stock_book.read().unwrap();
+    let history = &lock.get(&stock).unwrap().read().unwrap().history._historic_data;
+
+    let requested_hist = &history[granularity_index(granularity)];
+    let n = requested_hist.len();
+    
+    let subj: &[ObStat];
+    if n <= count {
+        subj = &requested_hist[..];
+    } else {
+        subj = &requested_hist[n-14..];
+    }
+
+    subj.iter().map(|x| Into::<StockHistoryDTO>::into(*x)).collect()
 }
 
 // ONLY FOR USAGE IN UNIT TESTS

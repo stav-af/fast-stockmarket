@@ -1,7 +1,7 @@
 use std::thread;
 
 use actix_cors::Cors;
-use actix_web::{get, post, web, App, HttpResponse, HttpServer, Error};
+use actix_web::{get, post, web, App, Error, HttpResponse, HttpServer, Result};
 
 mod kernel;
 mod handlers;
@@ -31,6 +31,11 @@ async fn ipo(details: web::Json<request_classes::IpoDTO>) -> Result<HttpResponse
 #[get("/price")]
 async fn price(query: web::Query<request_classes::StockQuery>) -> Result<HttpResponse, Error> {
     handle_price(query)
+}
+
+#[get("/stock_history")]
+async fn stock_history(details: web::Json<request_classes::PriceHistoryDTO>) -> Result<HttpResponse, Error> {
+   handle_stock_history(details)
 }
 
 #[actix_web::main]
