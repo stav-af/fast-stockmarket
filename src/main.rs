@@ -56,12 +56,13 @@ async fn main() -> std::io::Result<()> {
         App::new()
             .wrap(
                 Cors::default()
-                    .allowed_origin("http://localhost:4200")
+                    .allowed_origin("http://localhost:*")
             )
             .service(buy)
             .service(sell)
             .service(ipo)
             .service(price)
+            .service(stock_history)
     })
     .bind(("127.0.0.1", 8080))?
     .run()

@@ -96,10 +96,10 @@ impl HistoryBuffer {
         // the 'seconds' meausrements are compressed and pushed to the 'minute' array and so on
         let len = self._live_data.len();
 
-        // println!("Seconds: {}", self._live_data[0].len());
-        // println!("Minutes: {}", self._live_data[1].len());    
-        // println!("Hours  : {}", self._live_data[2].len());
-        // println!("Days   : {}", self._live_data[3].len());
+        // println!("Seconds: {} Hi: {}", self._live_data[0].len(), self._historic_data[0].len());
+        // println!("Minutes: {} Hi: {}", self._live_data[1].len(), self._historic_data[1].len());    
+        // println!("Hours  : {} Hi: {}", self._live_data[2].len(), self._historic_data[2].len());
+        // println!("Days   : {} Hi: {}", self._live_data[3].len(), self._historic_data[3].len());
         
         for i in 0..(len - 1) {
             let (current_hist, next_hist) = self._live_data.split_at_mut(i + 1);
@@ -115,6 +115,8 @@ impl HistoryBuffer {
                 if !uncompressed.is_empty() {self._historic_data[granularity_index(granularity)] = uncompressed}
             }
         }
+
+        self._historic_data[3] = self._live_data[3].clone();
     }
 
     /// Takes a list of ObStat, groups by measurements falling into a granularity one lower (e.g groups all seconds in the same minute)
@@ -138,7 +140,13 @@ impl HistoryBuffer {
                 .unwrap_or(measurements.len());
             
 
+
             subject = measurements.drain(0..index).collect();
+            if subject.len() == 0 {
+                println!("WARNING: no measurements at {}, likely the acceleration parameter is too high for this system", granularity as isize);
+                return (Vec::new(), Vec::new())
+            }
+
             let (max, min, vol) = subject.iter().fold((f64::MIN, f64::MAX, 0), |(max, min, vol), m| {
                 (max.max(m.high), min.min(m.low), vol + m.volume)
             }); 

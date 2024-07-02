@@ -11,6 +11,7 @@ pub struct PriceDTO {
 #[derive(Deserialize, Serialize)]
 pub struct StockHistoryDTO {
     pub tick: u64,
+    pub granularity: GRANULARITY,
     pub volume: u64,
     pub high: f64,
     pub low: f64,
@@ -22,6 +23,7 @@ impl From<ObStat> for StockHistoryDTO {
     fn from(internal: ObStat) -> Self {
         StockHistoryDTO {
             tick: internal.tick,
+            granularity: internal.granularity,
             volume: internal.volume, 
             high: internal.high,
             low: internal.low, 

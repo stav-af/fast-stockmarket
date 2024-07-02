@@ -92,7 +92,9 @@ pub fn report_transactions(stock: Stock) -> Vec<Transaction>{
     record.report_transactions();
 
     let transactions = &mut record.order_book.transaction_record;
-    let last_second_timestamp = MTime::which_second(transactions.last().unwrap().timestamp) * GRANULARITY::SECOND as u64;
+    if transactions.len() == 0 {return Vec::new()}
+
+    let last_second_timestamp: u64 = MTime::which_second(transactions.last().unwrap().timestamp) * GRANULARITY::SECOND as u64;
     
     let index = transactions.iter()
         .position(|x| x.timestamp > last_second_timestamp as i64)
@@ -203,7 +205,7 @@ pub fn get_stock_history(stock: Stock, granularity: GRANULARITY, count: usize) -
     if n <= count {
         subj = &requested_hist[..];
     } else {
-        subj = &requested_hist[n-14..];
+        subj = &requested_hist[n-count..];
     }
 
     subj.iter().map(|x| Into::<StockHistoryDTO>::into(*x)).collect()
