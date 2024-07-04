@@ -14,7 +14,8 @@ pub fn handle_order(req: web::Json<OrderDTO>, order_type: OrderType) -> Result<H
                 OrderType::Buy => buy(*stock, req.amount,req.price, None, None),
                 OrderType::Sell => sell(*stock, req.amount, req.price, None, None)
             }
-            Ok(HttpResponse::Ok().finish())
+            let price = get_price(*stock).to_string();
+            Ok(HttpResponse::Ok().body(price))
         },
         None => Ok(HttpResponse::NotFound().body("Stock not found")),
     }
